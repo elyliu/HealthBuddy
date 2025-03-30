@@ -110,12 +110,34 @@ app.post('/api/chat', async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
+    // Format the context for the AI
+    let formattedContext = '';
+    
+    if (context.recentActivities && context.recentActivities.length > 0) {
+      formattedContext += 'Recent activities:\n';
+      context.recentActivities.forEach(activity => {
+        formattedContext += `• ${activity.description} (${new Date(activity.date).toLocaleDateString()})\n`;
+      });
+      formattedContext += '\n';
+    }
+    
+    if (context.thingsToKeepInMind) {
+      formattedContext += 'Things to keep in mind:\n';
+      formattedContext += context.thingsToKeepInMind + '\n\n';
+    }
+
+    console.log('Formatted context:', formattedContext);
+
     const completion = await openai.chat.completions.create({
       model: "gpt-4",
       messages: [
         {
           role: "system",
           content: req.body.systemPrompt || "You are a supportive AI health buddy. Your role is to help users maintain and improve their health and fitness. You have access to their recent activities and personal reminders. Use this information to provide personalized, relevant advice and encouragement. Keep your responses friendly, concise, and focused on health and fitness goals."
+        },
+        {
+          role: "system",
+          content: formattedContext
         },
         {
           role: "user",
