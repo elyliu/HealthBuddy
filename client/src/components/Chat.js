@@ -36,9 +36,12 @@ function Chat() {
   const [error, setError] = useState(null);
   const [showAddActivity, setShowAddActivity] = useState(false);
   const [activities, setActivities] = useState([]);
+  const [goals, setGoals] = useState([]);
   const [currentTab, setCurrentTab] = useState(0);
   const [thingsToKeepInMind, setThingsToKeepInMind] = useState('');
   const [hasShownWelcome, setHasShownWelcome] = useState(false);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [user, setUser] = useState(null);
   const messagesEndRef = useRef(null);
 
   const theme = useTheme();
@@ -50,34 +53,76 @@ function Chat() {
   // Fetch activities and reminders
   const fetchData = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user?.id) {
+        console.log('No user ID available, skipping data fetch');
+        return;
+      }
 
-      // Fetch activities
-      const { data: activitiesData, error: activitiesError } = await supabase
-        .from('activities')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('date', { ascending: false });
+      console.log('Fetching data for user:', user.id);
+      
+      // Fetch all data in parallel
+      const [activitiesResponse, remindersResponse, profileResponse, goalsResponse] = await Promise.all([
+        supabase.from('activities').select('*').eq('user_id', user.id).order('date', { ascending: false }),
+        supabase.from('user_reminders').select('reminders').eq('user_id', user.id),
+        supabase.from('profiles').select('has_seen_welcome').eq('id', user.id).single(),
+        supabase.from('goals').select('*').eq('user_id', user.id)
+      ]);
 
-      if (activitiesError) throw activitiesError;
-      setActivities(activitiesData || []);
+      if (activitiesResponse.error) throw activitiesResponse.error;
+      if (remindersResponse.error) throw remindersResponse.error;
+      if (profileResponse.error) throw profileResponse.error;
+      if (goalsResponse.error) throw goalsResponse.error;
 
-      // Fetch reminders
-      const { data: remindersData, error: remindersError } = await supabase
-        .from('user_reminders')
-        .select('reminders')
-        .eq('user_id', user.id)
-        .single();
+      console.log('Activities data:', activitiesResponse.data);
+      console.log('Reminders data:', remindersResponse.data);
+      console.log('Profile data:', profileResponse.data);
+      console.log('Goals data:', goalsResponse.data);
 
-      if (remindersError) throw remindersError;
-      if (remindersData) {
-        setThingsToKeepInMind(remindersData.reminders);
+      setActivities(activitiesResponse.data || []);
+      setThingsToKeepInMind(remindersResponse.data?.[0]?.reminders || '');
+      setGoals(goalsResponse.data || []);
+
+      // Check if this is a new user who hasn't seen the welcome message
+      if (profileResponse.data && !profileResponse.data.has_seen_welcome) {
+        console.log('New user detected in Chat, showing welcome modal');
+        setShowWelcomeModal(true);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
+      setError('Failed to load data. Please try again.');
     }
   };
+
+  // Add useEffect to set user and fetch data
+  useEffect(() => {
+    const checkUser = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          setUser(user);
+          fetchData();
+        }
+      } catch (error) {
+        console.error('Error checking user:', error);
+        setError('Failed to load user data. Please try again.');
+      }
+    };
+
+    checkUser();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        setUser(session.user);
+        fetchData();
+      } else {
+        setUser(null);
+        setMessages([]);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
@@ -109,16 +154,15 @@ function Chat() {
           setActivities(activitiesData || []);
         }
 
-        // Fetch reminders
+        // Fetch reminders - don't use .single() since new users won't have reminders
         const { data: remindersData, error: remindersError } = await supabase
           .from('user_reminders')
           .select('reminders')
-          .eq('user_id', user.id)
-          .single();
+          .eq('user_id', user.id);
 
         if (remindersError) throw remindersError;
-        if (isMounted && remindersData) {
-          setThingsToKeepInMind(remindersData.reminders);
+        if (isMounted) {
+          setThingsToKeepInMind(remindersData?.[0]?.reminders || '');
         }
 
         // Show welcome message if not shown yet
@@ -127,11 +171,11 @@ function Chat() {
             message: "Hi! I'm your AI health buddy. How can I help you today?",
             userId: user.id,
             context: {
-              recentActivities: activitiesData.slice(0, 5).map(activity => ({
+              recentActivities: (activitiesData || []).slice(0, 5).map(activity => ({
                 description: activity.description,
                 date: activity.date
               })),
-              thingsToKeepInMind: remindersData?.reminders || ''
+              thingsToKeepInMind: remindersData?.[0]?.reminders || ''
             },
             systemPrompt: `Your name is Ellie.  You are a supportive, positive, and empathetic AI health buddy. Your role is to help users maintain and improve their long-term and sustainable healthy habits. Strive for consistency rather than quick fixes.
             You have access to their recent activities and personal reminders. Use this information to provide personalized, 
