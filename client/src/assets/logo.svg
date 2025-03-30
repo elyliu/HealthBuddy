@@ -1,0 +1,10 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="200" fill="#FFE4D6" />
+  <g transform="translate(50, 50)">
+    <!-- Person figure -->
+    <path d="M50 0C55 0 60 5 60 10C60 15 55 20 50 20C45 20 40 15 40 10C40 5 45 0 50 0Z" fill="#FF7F50"/>
+    <path d="M30 30C30 30 40 25 50 25C60 25 70 30 70 30L60 80C60 80 55 75 50 75C45 75 40 80 40 80L30 30Z" fill="#FF7F50"/>
+    <!-- Heart -->
+    <path d="M75 40C75 40 85 30 95 40C105 50 75 70 75 70C75 70 45 50 55 40C65 30 75 40 75 40Z" fill="#FF4B4B"/>
+  </g>
+</svg> 
