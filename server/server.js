@@ -9,7 +9,12 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://192.168.68.56:3000'],
+  origin: [
+    'http://localhost:3000',
+    'http://192.168.68.56:3000',
+    'https://healthbuddy-client.onrender.com',
+    'https://healthbuddy.onrender.com'
+  ],
   methods: ['GET', 'POST'],
   credentials: true,
   allowedHeaders: ['Content-Type', 'Accept']
@@ -22,6 +27,15 @@ app.use((req, res, next) => {
   console.log('Headers:', req.headers);
   console.log('Body:', req.body);
   next();
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  res.status(500).json({
+    error: 'Internal Server Error',
+    message: err.message
+  });
 });
 
 // MongoDB Connection
@@ -37,7 +51,7 @@ const openai = new OpenAI({
 // Supabase Configuration
 const supabase = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
+  process.env.SUPABASE_SERVICE_KEY
 );
 
 // Basic route for testing
@@ -86,48 +100,38 @@ app.get('/api/reminders/:userId', async (req, res) => {
   }
 });
 
-// Chat endpoint
+// Chat endpoint with improved error handling
 app.post('/api/chat', async (req, res) => {
   try {
+    console.log('Received chat request:', req.body);
     const { message, userId, context } = req.body;
-    
-    // Format the context for the AI
-    let formattedContext = '';
-    
-    if (context.recentActivities && context.recentActivities.length > 0) {
-      formattedContext += 'Recent activities:\n';
-      context.recentActivities.forEach(activity => {
-        formattedContext += `• ${activity.description} (${new Date(activity.date).toLocaleDateString()})\n`;
-      });
-      formattedContext += '\n';
-    }
-    
-    if (context.thingsToKeepInMind) {
-      formattedContext += 'Things to keep in mind:\n';
-      formattedContext += context.thingsToKeepInMind + '\n\n';
-    }
 
-    console.log('Sending request to OpenAI...');
-    const messages = [
-      { role: 'system', content: 'You are a helpful health and fitness assistant. Keep the user\'s context in mind when providing advice.' },
-      { role: 'system', content: formattedContext },
-      { role: 'user', content: message }
-    ];
+    if (!message || !userId) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4-turbo-preview",
-      messages: messages,
+      model: "gpt-4",
+      messages: [
+        {
+          role: "system",
+          content: req.body.systemPrompt || "You are a supportive AI health buddy. Your role is to help users maintain and improve their health and fitness. You have access to their recent activities and personal reminders. Use this information to provide personalized, relevant advice and encouragement. Keep your responses friendly, concise, and focused on health and fitness goals."
+        },
+        {
+          role: "user",
+          content: message
+        }
+      ],
       temperature: 0.7,
       max_tokens: 500
     });
 
-    const response = completion.choices[0].message.content;
-    console.log('Received response from OpenAI:', response);
-    res.json({ message: response });
+    console.log('OpenAI response:', completion.choices[0].message);
+    res.json({ message: completion.choices[0].message.content });
   } catch (error) {
-    console.error('Error in chat endpoint:', error);
+    console.error('Chat endpoint error:', error);
     res.status(500).json({ 
-      error: 'Failed to process request',
+      error: 'Failed to process chat request',
       details: error.message 
     });
   }
