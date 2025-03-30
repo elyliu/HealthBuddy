@@ -2,8 +2,6 @@ import React from 'react';
 import {
   AppBar,
   Toolbar,
-  Typography,
-  Button,
   Box,
   IconButton,
   useTheme,
@@ -35,23 +33,30 @@ function Navbar({ currentView, onViewChange }) {
         borderColor: 'divider'
       }}
     >
-      <Toolbar>
-        <Typography 
-          variant="h6" 
-          component="div" 
+      <Toolbar sx={{ 
+          p: 0,
+          minHeight: '80px !important'
+        }}>
+        <Box 
+          component="img"
+          src="/healthbuddy-logo.png"
+          alt="HealthBuddy"
           sx={{ 
-            flexGrow: 1,
-            fontWeight: 'bold',
-            color: 'white'
+            height: 100,
+            width: 'auto',
+            mr: 1,
+            cursor: 'pointer',
+            '&:hover': {
+              opacity: 0.9
+            }
           }}
-        >
-          HealthBuddy
-        </Typography>
+          onClick={() => onViewChange('chat')}
+        />
+        <Box sx={{ flexGrow: 1 }} />
         <Box sx={{ display: 'flex', gap: 1 }}>
           {navItems.map((item) => (
-            <Button
+            <IconButton
               key={item.value}
-              startIcon={item.icon}
               onClick={() => onViewChange(item.value)}
               sx={{
                 color: 'white',
@@ -59,11 +64,14 @@ function Navbar({ currentView, onViewChange }) {
                 fontWeight: currentView === item.value ? 'bold' : 'normal',
                 '&:hover': {
                   background: 'rgba(255, 255, 255, 0.1)',
-                }
+                },
+                ...(currentView === item.value && {
+                  background: 'rgba(255, 255, 255, 0.1)',
+                })
               }}
             >
-              {!isMobile && item.label}
-            </Button>
+              {item.icon}
+            </IconButton>
           ))}
         </Box>
       </Toolbar>

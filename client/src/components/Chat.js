@@ -476,20 +476,21 @@ function Chat() {
                     }}
                   >
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-                      <ListItemAvatar sx={{ minWidth: 36 }}>
+                      <ListItemAvatar sx={{ minWidth: 52 }}>
                         <Avatar 
                           sx={{ 
-                            width: 32, 
-                            height: 32,
+                            width: 48, 
+                            height: 48,
                             background: message.sender === 'You' 
                               ? 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)'
-                              : 'linear-gradient(135deg, #4CAF50 0%, #388E3C 100%)',
+                              : 'none',
                             boxShadow: message.sender === 'You'
                               ? '0 2px 10px rgba(33, 150, 243, 0.3)'
-                              : '0 2px 10px rgba(76, 175, 80, 0.3)'
+                              : 'none'
                           }}
+                          src={message.sender === 'You' ? null : '/healthbuddy_logo_round.png'}
                         >
-                          {message.sender === 'You' ? <PersonIcon /> : <BotIcon />}
+                          {message.sender === 'You' ? <PersonIcon /> : null}
                         </Avatar>
                       </ListItemAvatar>
                       <Typography variant="caption" color="text.secondary">
@@ -540,17 +541,16 @@ function Chat() {
                 {isTyping && (
                   <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', mb: 2 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-                      <ListItemAvatar sx={{ minWidth: 36 }}>
+                      <ListItemAvatar sx={{ minWidth: 52 }}>
                         <Avatar 
                           sx={{ 
-                            width: 32, 
-                            height: 32,
-                            background: 'linear-gradient(135deg, #4CAF50 0%, #388E3C 100%)',
-                            boxShadow: '0 2px 10px rgba(76, 175, 80, 0.3)'
+                            width: 48, 
+                            height: 48,
+                            background: 'none',
+                            boxShadow: 'none'
                           }}
-                        >
-                          <BotIcon />
-                        </Avatar>
+                          src="/healthbuddy_logo_round.png"
+                        />
                       </ListItemAvatar>
                       <Typography variant="caption" color="text.secondary">
                         HealthBuddy

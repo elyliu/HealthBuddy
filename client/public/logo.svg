@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="400" viewBox="0 0 800 400" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <g>
+        <!-- Robot head -->
+        <rect x="50" y="50" width="200" height="200" rx="30" fill="#B3E0FF" stroke="#1B3C59" stroke-width="15"/>
+        <circle cx="100" cy="120" r="20" fill="#1B3C59"/> <!-- Left eye -->
+        <circle cx="200" cy="120" r="20" fill="#1B3C59"/> <!-- Right eye -->
+        <path d="M 100 180 Q 150 220 200 180" stroke="#1B3C59" stroke-width="15" fill="none"/> <!-- Smile -->
+        <circle cx="150" cy="30" r="20" fill="#1B3C59"/> <!-- Antenna -->
+        
+        <!-- Speech bubble -->
+        <path d="M 50 250 L 100 300 L 250 300 L 250 200" fill="#B3E0FF" stroke="#1B3C59" stroke-width="15"/>
+        <rect x="100" y="200" width="150" height="100" fill="#B3E0FF" stroke="#1B3C59" stroke-width="15"/>
+        <text x="150" y="260" font-family="Arial" font-size="40" fill="#1B3C59">+</text>
+    </g>
+</svg> 
