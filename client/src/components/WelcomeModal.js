@@ -19,17 +19,16 @@ import {
 } from '@mui/icons-material';
 
 function WelcomeModal({ open, onClose }) {
-  console.log('WelcomeModal render - open:', open);
 
   React.useEffect(() => {
-    console.log('WelcomeModal mounted');
+    // console.log('WelcomeModal mounted');
     return () => {
-      console.log('WelcomeModal unmounted');
+      // console.log('WelcomeModal unmounted');
     };
   }, []);
 
   React.useEffect(() => {
-    console.log('WelcomeModal open state changed:', open);
+    // console.log('WelcomeModal open state changed:', open);
   }, [open]);
 
   // Don't render anything if not open

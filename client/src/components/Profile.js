@@ -240,59 +240,49 @@ function Profile() {
 
     try {
       if (isSignUp) {
-        console.log('Attempting sign up...');
-        
-        // First, create the user
+        // Sign up
         const { data: authData, error: authError } = await supabase.auth.signUp({
           email,
-          password
+          password,
+          options: {
+            data: {
+              name: name
+            }
+          }
         });
 
-        if (authError) {
-          console.error('Auth sign up error:', authError);
-          throw authError;
+        if (authError) throw authError;
+
+        // Create profile for new user
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert([
+            {
+              id: authData.user.id,
+              name: name,
+              email: email,
+              has_seen_welcome: false
+            }
+          ]);
+
+        if (profileError) {
+          console.error('Error creating profile:', profileError);
+          throw profileError;
         }
 
-        if (!authData?.user) {
-          throw new Error('No user data returned from sign up');
-        }
-
-        // Then, update the user's metadata
-        const { error: updateError } = await supabase.auth.updateUser({
-          data: { name: name }
-        });
-
-        if (updateError) {
-          console.error('Update user error:', updateError);
-          throw updateError;
-        }
-
-        console.log('Sign up successful:', authData);
-        setSuccess('Check your email for the confirmation link!');
+        setSuccess('Please check your email for verification link!');
       } else {
-        console.log('Attempting sign in...');
-        const { data, error } = await supabase.auth.signInWithPassword({
+        // Sign in
+        const { error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password
         });
 
-        if (error) {
-          console.error('Sign in error:', error);
-          throw error;
-        }
-        
-        console.log('Sign in response:', data);
-        if (data?.user) {
-          setSuccess('Successfully logged in!');
-          setIsAuthenticated(true);
-          setUser(data.user);
-          fetchGoals(data.user.id);
-          fetchReminders(data.user.id);
-        }
+        if (signInError) throw signInError;
       }
     } catch (error) {
       console.error('Auth error:', error);
-      setError(error.message || 'An unexpected error occurred');
+      setError(error.message);
     } finally {
       setLoading(false);
     }

@@ -28,6 +28,16 @@ import { supabase } from '../lib/supabaseClient';
 import config from '../config';
 import AddActivityDialog from './AddActivityDialog';
 import ActivitiesTab from './ActivitiesTab';
+import WelcomeModal from './WelcomeModal';
+import { keyframes } from '@mui/system';
+
+// Add the loading dots animation
+const loadingDots = keyframes`
+  0%, 20% { content: '.'; }
+  40% { content: '..'; }
+  60% { content: '...'; }
+  80%, 100% { content: ''; }
+`;
 
 function Chat() {
   const [messages, setMessages] = useState([]);
@@ -39,10 +49,10 @@ function Chat() {
   const [goals, setGoals] = useState([]);
   const [currentTab, setCurrentTab] = useState(0);
   const [thingsToKeepInMind, setThingsToKeepInMind] = useState('');
-  const [hasShownWelcome, setHasShownWelcome] = useState(false);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [user, setUser] = useState(null);
   const messagesEndRef = useRef(null);
+  const [isTyping, setIsTyping] = useState(false);
 
   const theme = useTheme();
 
@@ -51,7 +61,7 @@ function Chat() {
   };
 
   // Fetch activities and reminders
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       if (!user?.id) {
         console.log('No user ID available, skipping data fetch');
@@ -70,37 +80,161 @@ function Chat() {
 
       if (activitiesResponse.error) throw activitiesResponse.error;
       if (remindersResponse.error) throw remindersResponse.error;
-      if (profileResponse.error) throw profileResponse.error;
-      if (goalsResponse.error) throw goalsResponse.error;
+      if (profileResponse.error) {
+        console.error('Profile fetch error:', profileResponse.error);
+        throw profileResponse.error;
+      }
+      if (goalsResponse.error) {
+        console.error('Goals fetch error:', goalsResponse.error);
+        throw goalsResponse.error;
+      }
 
-      console.log('Activities data:', activitiesResponse.data);
-      console.log('Reminders data:', remindersResponse.data);
       console.log('Profile data:', profileResponse.data);
+      console.log('has_seen_welcome:', profileResponse.data?.has_seen_welcome);
       console.log('Goals data:', goalsResponse.data);
 
       setActivities(activitiesResponse.data || []);
       setThingsToKeepInMind(remindersResponse.data?.[0]?.reminders || '');
       setGoals(goalsResponse.data || []);
 
+      // Log the goals state after setting it
+      console.log('Goals state after setting:', goalsResponse.data || []);
+
       // Check if this is a new user who hasn't seen the welcome message
       if (profileResponse.data && !profileResponse.data.has_seen_welcome) {
-        console.log('New user detected in Chat, showing welcome modal');
+        console.log('New user detected in Chat, showing welcome modal and message');
         setShowWelcomeModal(true);
+        
+        // Only add welcome message if there are no messages yet
+        if (messages.length === 0) {
+          // Add initial welcome message
+          const requestBody = {
+            message: "Hi! I'm your AI health buddy. How can I help you today?",
+            userId: user.id,
+            context: {
+              recentActivities: (activitiesResponse.data || []).slice(0, 5).map(activity => ({
+                description: activity.description,
+                date: activity.date
+              })),
+              thingsToKeepInMind: remindersResponse.data?.[0]?.reminders || '',
+              goals: goalsResponse.data || []
+            },
+            systemPrompt: `Your name is Ellie.  You are a supportive, positive, and empathetic AI health buddy. Your role is to help users maintain and improve their long-term and sustainable healthy habits. Strive for consistency rather than quick fixes.
+            You have access to their recent activities, personal reminders, and goals. Use this information to provide personalized, relevant advice and encouragement. 
+            Keep responses to 2-3 sentences maximum unless the user asks for more. Keep your responses friendly and focused on health and fitness goals—avoid jargon when possible. 
+            If a user's question suggests they need medical attention, advise them to consult a qualified healthcare professional.  Maybe ask questions at the end to encourage a dialogue or suggest activities to make small incremental progress toward their goals.
+            If the user starts describing what they did recently, remind them to add the activities in the Activities tab, but don't ask them to do it every time.
+            Things you want to encourage:
+            Small, incremental changes to avoid burnout or injury. Emphasizing that consistency is key—flex goals rather than skip them.
+            Encouraging any form of physical activity—not just formal workouts.
+            Including strength training where feasible.
+            Reducing sugar intake and increasing protein and fiber intake.`
+          };
+
+          console.log('Sending initial welcome message request');
+          const response = await fetch(`${config.serverUrl}/api/chat`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestBody),
+          });
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Welcome message request failed:', errorText);
+            throw new Error(`Failed to get welcome message: ${response.status} ${errorText}`);
+          }
+
+          const data = await response.json();
+          console.log('Welcome message response:', data);
+          
+          if (!data.message) {
+            throw new Error('Invalid response from server');
+          }
+
+          // Update messages state with the welcome message
+          setMessages([{
+            sender: 'HealthBuddy',
+            content: data.message,
+            timestamp: new Date()
+          }]);
+        }
+      } else if (messages.length === 0) {
+        // Add welcome back message for existing users
+        const requestBody = {
+          message: "Welcome back! How can I help you today?",
+          userId: user.id,
+          context: {
+            recentActivities: (activitiesResponse.data || []).slice(0, 5).map(activity => ({
+              description: activity.description,
+              date: activity.date
+            })),
+            thingsToKeepInMind: remindersResponse.data?.[0]?.reminders || '',
+            goals: goalsResponse.data || []
+          },
+          systemPrompt: `Your name is Ellie.  You are a supportive, positive, and empathetic AI health buddy. Your role is to help users maintain and improve their long-term and sustainable healthy habits. Strive for consistency rather than quick fixes.
+            You have access to their recent activities, personal reminders, and goals. Use this information to provide personalized, relevant advice and encouragement. 
+            Keep responses to 2-3 sentences maximum unless the user asks for more. Keep your responses friendly and focused on health and fitness goals—avoid jargon when possible. 
+            If a user's question suggests they need medical attention, advise them to consult a qualified healthcare professional.  Maybe ask questions at the end to encourage a dialogue or suggest activities to make small incremental progress toward their goals.
+            If the user starts describing what they did recently, remind them to add the activities in the Activities tab, but don't ask them to do it every time.
+            Things you want to encourage:
+            Small, incremental changes to avoid burnout or injury. Emphasizing that consistency is key—flex goals rather than skip them.
+            Encouraging any form of physical activity—not just formal workouts.
+            Including strength training where feasible.
+            Reducing sugar intake and increasing protein and fiber intake.`
+        };
+
+        const response = await fetch(`${config.serverUrl}/api/chat`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestBody),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Welcome back message request failed:', errorText);
+          throw new Error(`Failed to get welcome back message: ${response.status} ${errorText}`);
+        }
+
+        const data = await response.json();
+        if (!data.message) {
+          throw new Error('Invalid response from server');
+        }
+
+        setMessages([{
+          sender: 'HealthBuddy',
+          content: data.message,
+          timestamp: new Date()
+        }]);
+      } else {
+        console.log('User has already seen welcome message or no profile data');
       }
     } catch (error) {
       console.error('Error fetching data:', error);
       setError('Failed to load data. Please try again.');
     }
-  };
+  }, [user?.id, messages.length]);
 
   // Add useEffect to set user and fetch data
   useEffect(() => {
     const checkUser = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          setUser(user);
-          fetchData();
+        console.log('Checking user session...');
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Session check error:', error);
+          throw error;
+        }
+        
+        console.log('Session check result:', session ? 'Session found' : 'No session');
+        if (session?.user) {
+          console.log('Setting user:', session.user);
+          setUser(session.user);
+          await fetchData();
         }
       } catch (error) {
         console.error('Error checking user:', error);
@@ -112,9 +246,11 @@ function Chat() {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state changed:', event, session?.user);
       if (session?.user) {
+        console.log('Setting user from auth change:', session.user);
         setUser(session.user);
-        fetchData();
+        await fetchData();
       } else {
         setUser(null);
         setMessages([]);
@@ -122,114 +258,30 @@ function Chat() {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [fetchData]);
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
-  // Initial data fetch and welcome message
-  useEffect(() => {
-    let isMounted = true;
-
-    const initializeChat = async () => {
-      if (!isMounted) return;
-
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          setError('Please log in to continue');
-          return;
-        }
-
-        // Fetch activities
-        const { data: activitiesData, error: activitiesError } = await supabase
-          .from('activities')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('date', { ascending: false });
-
-        if (activitiesError) throw activitiesError;
-        if (isMounted) {
-          setActivities(activitiesData || []);
-        }
-
-        // Fetch reminders - don't use .single() since new users won't have reminders
-        const { data: remindersData, error: remindersError } = await supabase
-          .from('user_reminders')
-          .select('reminders')
-          .eq('user_id', user.id);
-
-        if (remindersError) throw remindersError;
-        if (isMounted) {
-          setThingsToKeepInMind(remindersData?.[0]?.reminders || '');
-        }
-
-        // Show welcome message if not shown yet
-        if (!hasShownWelcome && isMounted) {
-          const requestBody = {
-            message: "Hi! I'm your AI health buddy. How can I help you today?",
-            userId: user.id,
-            context: {
-              recentActivities: (activitiesData || []).slice(0, 5).map(activity => ({
-                description: activity.description,
-                date: activity.date
-              })),
-              thingsToKeepInMind: remindersData?.[0]?.reminders || ''
-            },
-            systemPrompt: `Your name is Ellie.  You are a supportive, positive, and empathetic AI health buddy. Your role is to help users maintain and improve their long-term and sustainable healthy habits. Strive for consistency rather than quick fixes.
-            You have access to their recent activities and personal reminders. Use this information to provide personalized, 
-            relevant advice and encouragement. Keep your responses friendly, concise, and focused on health and fitness goals—avoid jargon when possible. 
-            If a user's question suggests they need medical attention, advise them to consult a qualified healthcare professional.  Maybe ask questions at the end to encourage a dialogue or suggest activities to make small incremental progress toward their goals.
-            If the user starts describing what they did recently, remind them to add the activities in the Activities tab.
-            Things you want to encourage:
-            Small, incremental changes to avoid burnout or injury. Emphasizing that consistency is key—flex goals rather than skip them.
-            Encouraging any form of physical activity—not just formal workouts.
-            Including strength training where feasible.
-            Reducing sugar intake and increasing protein and fiber intake.`
-          };
-
-          const response = await fetch(`${config.serverUrl}/api/chat`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestBody),
-          });
-
-          if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Failed to get welcome message: ${response.status} ${errorText}`);
-          }
-
-          const data = await response.json();
-          if (!data.message) {
-            throw new Error('Invalid response from server');
-          }
+  const handleWelcomeModalClose = async () => {
+    try {
+      if (user?.id) {
+        // Update the user's profile to mark welcome as seen
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({ has_seen_welcome: true })
+          .eq('id', user.id);
           
-          if (isMounted) {
-            setMessages([{
-              sender: 'HealthBuddy',
-              content: data.message,
-              timestamp: new Date()
-            }]);
-            setHasShownWelcome(true);
-          }
-        }
-      } catch (error) {
-        console.error('Error in initializeChat:', error);
-        if (isMounted) {
-          setError(`Failed to initialize chat: ${error.message}`);
+        if (updateError) {
+          console.error('Error updating welcome status:', updateError);
         }
       }
-    };
-
-    initializeChat();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [hasShownWelcome]); // Only depend on hasShownWelcome
+      setShowWelcomeModal(false);
+    } catch (error) {
+      console.error('Error handling welcome modal close:', error);
+    }
+  };
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -238,6 +290,7 @@ function Chat() {
     setInput('');
     setLoading(true);
     setError(null);
+    setIsTyping(true);
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -261,22 +314,22 @@ function Chat() {
             description: activity.description,
             date: activity.date
           })),
-          thingsToKeepInMind: thingsToKeepInMind
+          thingsToKeepInMind: thingsToKeepInMind,
+          goals: goals
         },
         systemPrompt: `Your name is Ellie.  You are a supportive, positive, and empathetic AI health buddy. Your role is to help users maintain and improve their long-term and sustainable healthy habits. Strive for consistency rather than quick fixes.
-        You have access to their recent activities and personal reminders. Use this information to provide personalized, 
-        relevant advice and encouragement. Keep your responses friendly, concise, and focused on health and fitness goals—avoid jargon when possible. 
+        You have access to their recent activities, personal reminders, and goals. Use this information to provide personalized, relevant advice and encouragement. 
+        Keep responses to 2-3 sentences maximum unless the user asks for more. Keep your responses friendly and focused on health and fitness goals—avoid jargon when possible. 
         If a user's question suggests they need medical attention, advise them to consult a qualified healthcare professional.  Maybe ask questions at the end to encourage a dialogue or suggest activities to make small incremental progress toward their goals.
-        If the user starts describing what they did recently, remind them to add the activities in the Activities tab.
+        If the user starts describing what they did recently, remind them to add the activities in the Activities tab, but don't ask them to do it every time.
         Things you want to encourage:
         Small, incremental changes to avoid burnout or injury. Emphasizing that consistency is key—flex goals rather than skip them.
         Encouraging any form of physical activity—not just formal workouts.
         Including strength training where feasible.
         Reducing sugar intake and increasing protein and fiber intake.`
-        // systemPrompt: `You are a supportive AI health buddy. Your role is to help users maintain and improve their health and fitness. 
-        // You have access to their recent activities and personal reminders. Use this information to provide personalized, 
-        // relevant advice and encouragement. Keep your responses friendly, concise, and focused on health and fitness goals.`
       };
+
+      console.log('Sending chat request with context:', requestBody.context);
 
       const response = await fetch(`${config.serverUrl}/api/chat`, {
         method: 'POST',
@@ -306,6 +359,7 @@ function Chat() {
       setError(`Failed to send message: ${error.message}`);
     } finally {
       setLoading(false);
+      setIsTyping(false);
     }
   };
 
@@ -483,6 +537,56 @@ function Chat() {
                     </Paper>
                   </ListItem>
                 ))}
+                {isTyping && (
+                  <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', mb: 2 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                      <ListItemAvatar sx={{ minWidth: 36 }}>
+                        <Avatar 
+                          sx={{ 
+                            width: 32, 
+                            height: 32,
+                            background: 'linear-gradient(135deg, #4CAF50 0%, #388E3C 100%)',
+                            boxShadow: '0 2px 10px rgba(76, 175, 80, 0.3)'
+                          }}
+                        >
+                          <BotIcon />
+                        </Avatar>
+                      </ListItemAvatar>
+                      <Typography variant="caption" color="text.secondary">
+                        HealthBuddy
+                      </Typography>
+                    </Box>
+                    <Paper
+                      elevation={0}
+                      sx={{
+                        p: 2,
+                        maxWidth: '95%',
+                        background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
+                        borderRadius: 2,
+                        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
+                        position: 'relative',
+                        minWidth: '100px'
+                      }}
+                    >
+                      <Typography variant="body1">
+                        <Box
+                          component="span"
+                          sx={{
+                            '&::after': {
+                              content: '""',
+                              animation: `${loadingDots} 1.5s infinite`,
+                              display: 'inline-block',
+                              width: '1em',
+                              textAlign: 'left'
+                            }
+                          }}
+                        >
+                          Typing
+                        </Box>
+                      </Typography>
+                    </Paper>
+                  </ListItem>
+                )}
                 <div ref={messagesEndRef} />
               </List>
 
@@ -556,6 +660,11 @@ function Chat() {
           setShowAddActivity(false);
           fetchData();
         }} 
+      />
+
+      <WelcomeModal
+        open={showWelcomeModal}
+        onClose={handleWelcomeModalClose}
       />
     </Container>
   );
