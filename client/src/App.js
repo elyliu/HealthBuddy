@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+import { Container, Box } from '@mui/material';
 import Navbar from './components/Navbar';
 import Chat from './components/Chat';
 import Profile from './components/Profile';
+import About from './components/About';
 
 const theme = createTheme({
   palette: {
@@ -74,15 +76,27 @@ const theme = createTheme({
 });
 
 function App() {
+  const [currentView, setCurrentView] = useState('chat');
+
+  const renderContent = () => {
+    switch (currentView) {
+      case 'profile':
+        return <Profile />;
+      case 'about':
+        return <About />;
+      default:
+        return <Chat />;
+    }
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<Chat />} />
-          <Route path="/profile" element={<Profile />} />
-        </Routes>
+        <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+          <Navbar currentView={currentView} onViewChange={setCurrentView} />
+          {renderContent()}
+        </Box>
       </Router>
     </ThemeProvider>
   );
