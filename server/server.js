@@ -126,6 +126,14 @@ app.post('/api/chat', async (req, res) => {
       formattedContext += context.thingsToKeepInMind + '\n\n';
     }
 
+    if (context.goals && context.goals.length > 0) {
+      formattedContext += 'Current goals:\n';
+      context.goals.forEach(goal => {
+        formattedContext += `• ${goal.description}\n`;
+      });
+      formattedContext += '\n';
+    }
+
     console.log('Formatted context:', formattedContext);
 
     const completion = await openai.chat.completions.create({
@@ -133,7 +141,7 @@ app.post('/api/chat', async (req, res) => {
       messages: [
         {
           role: "system",
-          content: req.body.systemPrompt || "You are a supportive AI health buddy. Your role is to help users maintain and improve their health and fitness. You have access to their recent activities and personal reminders. Use this information to provide personalized, relevant advice and encouragement. Keep your responses friendly, concise, and focused on health and fitness goals."
+          content: req.body.systemPrompt || process.env.SYSTEM_PROMPT || "You are a supportive AI health buddy. Your role is to help users maintain and improve their health and fitness. You have access to their recent activities and personal reminders. Use this information to provide personalized, relevant advice and encouragement. Keep your responses friendly, concise, and focused on health and fitness goals."
         },
         {
           role: "system",
