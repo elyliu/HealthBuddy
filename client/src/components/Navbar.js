@@ -35,6 +35,7 @@ function Navbar({ currentView, onViewChange }) {
     >
       <Toolbar sx={{ 
           p: 0,
+          pl: { xs: 2, sm: 2 },
           minHeight: '80px !important'
         }}>
         <Box 
