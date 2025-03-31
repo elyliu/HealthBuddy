@@ -137,7 +137,7 @@ app.post('/api/chat', async (req, res) => {
     console.log('Formatted context:', formattedContext);
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4-turbo-preview",
       messages: [
         {
           role: "system",
