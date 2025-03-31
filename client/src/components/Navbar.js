@@ -26,7 +26,7 @@ function Navbar({ currentView, onViewChange }) {
       position="sticky" 
       elevation={0}
       sx={{ 
-        background: 'linear-gradient(135deg, #FF7F50 0%, #FF6B6B 100%)',
+        background: 'linear-gradient(135deg, #FFB800 0%, #FFA000 100%)',
         borderBottom: '1px solid',
         borderColor: 'divider'
       }}
@@ -58,14 +58,14 @@ function Navbar({ currentView, onViewChange }) {
               key={item.value}
               onClick={() => onViewChange(item.value)}
               sx={{
-                color: 'white',
+                color: '#000000',
                 textTransform: 'none',
                 fontWeight: currentView === item.value ? 'bold' : 'normal',
                 '&:hover': {
-                  background: 'rgba(255, 255, 255, 0.1)',
+                  background: 'rgba(0, 0, 0, 0.1)',
                 },
                 ...(currentView === item.value && {
-                  background: 'rgba(255, 255, 255, 0.1)',
+                  background: 'rgba(0, 0, 0, 0.1)',
                 })
               }}
             >

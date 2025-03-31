@@ -13,47 +13,89 @@ import { supabase } from './lib/supabaseClient';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#FF7F50', // Orange from logo
-      contrastText: '#fff',
+      main: '#FFB800', // Energetic yellow
+      light: '#FFD54F',
+      dark: '#FFA000',
+      contrastText: '#000000',
     },
     secondary: {
-      main: '#FF4B4B', // Red from heart in logo
-      contrastText: '#fff',
+      main: '#FF6B6B', // Coral red for energy
+      light: '#FF8A80',
+      dark: '#FF5252',
+      contrastText: '#000000',
     },
     background: {
-      default: '#FFE4D6', // Light peach background
-      paper: '#fff',
+      default: '#F5F5F5',
+      paper: '#FFFFFF',
     },
     text: {
-      primary: '#2C3E50', // Dark blue-gray
-      secondary: '#95A5A6', // Light gray
+      primary: '#333333',
+      secondary: '#666666',
+    },
+    error: {
+      main: '#FF5252',
+      light: '#FF867F',
+      dark: '#C50E29',
+    },
+    success: {
+      main: '#4CAF50',
+      light: '#80E27E',
+      dark: '#087F23',
+    },
+    warning: {
+      main: '#FFC107',
+      light: '#FFF350',
+      dark: '#C79100',
+    },
+    info: {
+      main: '#2196F3',
+      light: '#6EC6FF',
+      dark: '#0069C0',
     },
   },
   typography: {
-    fontFamily: '"Segoe UI", "Roboto", "Arial", sans-serif',
+    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
     h1: {
+      fontSize: '2.5rem',
       fontWeight: 700,
-      color: '#2C3E50',
+      color: '#FFB800', // Yellow for headings
     },
     h2: {
+      fontSize: '2rem',
       fontWeight: 600,
-      color: '#2C3E50',
+      color: '#FFB800',
     },
     h3: {
+      fontSize: '1.75rem',
       fontWeight: 600,
-      color: '#2C3E50',
+      color: '#FFB800',
     },
     h4: {
-      fontWeight: 600,
-      color: '#2C3E50',
+      fontSize: '1.5rem',
+      fontWeight: 500,
+      color: '#FFB800',
     },
     h5: {
-      fontWeight: 600,
-      color: '#2C3E50',
+      fontSize: '1.25rem',
+      fontWeight: 500,
+      color: '#FFB800',
     },
     h6: {
+      fontSize: '1rem',
+      fontWeight: 500,
+      color: '#FFB800',
+    },
+    body1: {
+      fontSize: '1rem',
+      lineHeight: 1.5,
+    },
+    body2: {
+      fontSize: '0.875rem',
+      lineHeight: 1.43,
+    },
+    button: {
+      textTransform: 'none',
       fontWeight: 600,
-      color: '#2C3E50',
     },
   },
   components: {
@@ -61,8 +103,16 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 8,
-          textTransform: 'none',
-          fontWeight: 600,
+          padding: '8px 16px',
+          '&:hover': {
+            backgroundColor: 'rgba(255, 184, 0, 0.1)', // Yellow hover effect
+          },
+        },
+        contained: {
+          boxShadow: 'none',
+          '&:hover': {
+            boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+          },
         },
       },
     },
@@ -70,7 +120,34 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 12,
-          boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+          boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.1)',
+        },
+      },
+    },
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#FFB800', // Yellow navbar
+          color: '#000000',
+          boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+        },
+      },
+    },
+    MuiBottomNavigation: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#FFFFFF',
+          boxShadow: '0px -2px 4px rgba(0, 0, 0, 0.1)',
+        },
+      },
+    },
+    MuiBottomNavigationAction: {
+      styleOverrides: {
+        root: {
+          color: '#666666',
+          '&.Mui-selected': {
+            color: '#FFB800', // Yellow for selected items
+          },
         },
       },
     },
