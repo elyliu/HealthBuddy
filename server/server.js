@@ -51,13 +51,7 @@ const openai = new OpenAI({
 // Supabase Configuration
 const supabase = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  }
+  process.env.SUPABASE_SERVICE_KEY
 );
 
 // Basic route for testing
@@ -174,8 +168,7 @@ app.post('/api/chat', async (req, res) => {
           user_id: req.body.userId,
           user_message: req.body.message,
           bot_response: response
-        })
-        .select();
+        });
 
       if (insertError) {
         console.error('Error logging chat message:', insertError);
