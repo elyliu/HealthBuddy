@@ -88,7 +88,6 @@ function Chat() {
         throw goalsResponse.error;
       }
 
-      console.log('Profile data:', profileResponse.data);
       console.log('Goals data:', goalsResponse.data);
 
       setActivities(activitiesResponse.data || []);
@@ -115,7 +114,9 @@ function Chat() {
                 date: activity.date
               })),
               thingsToKeepInMind: remindersResponse.data?.[0]?.reminders || '',
-              goals: goalsResponse.data || []
+              goals: goalsResponse.data.map(goal => ({
+                description: goal.goal_text
+              }))
             },
             systemPrompt: `Your name is Ellie.  You are a supportive, positive, and empathetic AI health buddy. Your role is to help users maintain and improve their long-term and sustainable healthy habits. Strive for consistency rather than quick fixes.
             You have access to their recent activities, personal reminders, and goals. Use this information to provide personalized, relevant advice and encouragement. 
@@ -169,7 +170,9 @@ function Chat() {
               date: activity.date
             })),
             thingsToKeepInMind: remindersResponse.data?.[0]?.reminders || '',
-            goals: goalsResponse.data || []
+            goals: goalsResponse.data.map(goal => ({
+              description: goal.goal_text
+            }))
           },
           systemPrompt: `Your name is Ellie.  You are a supportive, positive, and empathetic AI health buddy. Your role is to help users maintain and improve their long-term and sustainable healthy habits. Strive for consistency rather than quick fixes.
             You have access to their recent activities, personal reminders, and goals. Use this information to provide personalized, relevant advice and encouragement. 
@@ -313,7 +316,9 @@ function Chat() {
             date: activity.date
           })),
           thingsToKeepInMind: thingsToKeepInMind,
-          goals: goals
+          goals: goals.map(goal => ({
+            description: goal.goal_text
+          }))
         },
         systemPrompt: `Your name is Ellie.  You are a supportive, positive, and empathetic AI health buddy. Your role is to help users maintain and improve their long-term and sustainable healthy habits. Strive for consistency rather than quick fixes.
         You have access to their recent activities, personal reminders, and goals. Use this information to provide personalized, relevant advice and encouragement. 
@@ -326,6 +331,9 @@ function Chat() {
         Including strength training where feasible.
         Reducing sugar intake and increasing protein and fiber intake.`
       };
+
+      console.log('Raw goals from state:', goals);
+      console.log('Mapped goals in request:', requestBody.context.goals);
 
       console.log('Sending chat request with context:', requestBody.context);
 
