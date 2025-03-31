@@ -459,20 +459,13 @@ function Chat() {
             </Tabs>
           </Box>
 
-          <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-              {currentTab === 0 ? 'Chat with HealthBuddy' : 'Tracked Activities'}
-            </Typography>
-            {currentTab === 1 && (
+          {currentTab === 1 && (
+            <Box sx={{ position: 'absolute', top: 8, right: 16, zIndex: 1000 }}>
               <Fab
                 color="error"
                 aria-label="add activity"
                 onClick={() => setShowAddActivity(true)}
                 sx={{
-                  position: 'absolute',
-                  top: 16,
-                  right: 16,
-                  zIndex: 1000,
                   background: 'linear-gradient(135deg, #FF4081 0%, #C2185B 100%)',
                   boxShadow: '0 4px 20px rgba(244, 67, 54, 0.3)',
                   '&:hover': {
@@ -483,8 +476,8 @@ function Chat() {
               >
                 <AddIcon />
               </Fab>
-            )}
-          </Box>
+            </Box>
+          )}
 
           {error && (
             <Alert severity="error" sx={{ m: 2, borderRadius: 2 }}>
@@ -525,23 +518,18 @@ function Chat() {
                     }}
                   >
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-                      <ListItemAvatar sx={{ minWidth: 52 }}>
-                        <Avatar 
-                          sx={{ 
-                            width: 48, 
-                            height: 48,
-                            background: message.sender === 'You' 
-                              ? 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)'
-                              : 'none',
-                            boxShadow: message.sender === 'You'
-                              ? '0 2px 10px rgba(33, 150, 243, 0.3)'
-                              : 'none'
-                          }}
-                          src={message.sender === 'You' ? null : '/healthbuddy_logo_round.png'}
-                        >
-                          {message.sender === 'You' ? <PersonIcon /> : null}
-                        </Avatar>
-                      </ListItemAvatar>
+                      {message.sender !== 'You' && (
+                        <ListItemAvatar sx={{ minWidth: 52 }}>
+                          <Avatar 
+                            sx={{ 
+                              width: 48, 
+                              height: 48,
+                              background: 'none'
+                            }}
+                            src="/healthbuddy_logo_round.png"
+                          />
+                        </ListItemAvatar>
+                      )}
                       <Typography variant="caption" color="text.secondary">
                         {message.sender}
                       </Typography>
@@ -551,6 +539,7 @@ function Chat() {
                       sx={{
                         p: 2,
                         maxWidth: '95%',
+                        ml: message.sender === 'You' ? 0 : '52px', // Add margin to align with avatar
                         background: message.sender === 'You' 
                           ? 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)'
                           : 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
@@ -595,8 +584,7 @@ function Chat() {
                           sx={{ 
                             width: 48, 
                             height: 48,
-                            background: 'none',
-                            boxShadow: 'none'
+                            background: 'none'
                           }}
                           src="/healthbuddy_logo_round.png"
                         />
@@ -610,6 +598,7 @@ function Chat() {
                       sx={{
                         p: 2,
                         maxWidth: '95%',
+                        ml: '52px', // Add margin to align with avatar
                         background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
                         borderRadius: 2,
                         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
