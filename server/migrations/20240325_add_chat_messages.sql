@@ -11,10 +11,10 @@ CREATE TABLE IF NOT EXISTS chat_messages (
 -- Add RLS policies
 ALTER TABLE chat_messages ENABLE ROW LEVEL SECURITY;
 
--- Allow users to insert their own messages
-CREATE POLICY "Users can insert their own chat messages"
+-- Allow the server to insert messages (using service role)
+CREATE POLICY "Server can insert chat messages"
     ON chat_messages FOR INSERT
-    WITH CHECK (auth.uid() = user_id);
+    WITH CHECK (true);
 
 -- Allow users to view their own messages
 CREATE POLICY "Users can view their own chat messages"

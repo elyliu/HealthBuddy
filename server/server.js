@@ -168,7 +168,8 @@ app.post('/api/chat', async (req, res) => {
           user_id: req.body.userId,
           user_message: req.body.message,
           bot_response: response
-        });
+        })
+        .select();
 
       if (insertError) {
         console.error('Error logging chat message:', insertError);
