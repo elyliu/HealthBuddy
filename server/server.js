@@ -136,6 +136,7 @@ app.post('/api/chat', async (req, res) => {
 
     console.log('Formatted context:', formattedContext);
 
+    // Get response from OpenAI
     const completion = await openai.chat.completions.create({
       model: "gpt-4-turbo",
       messages: [
@@ -156,8 +157,29 @@ app.post('/api/chat', async (req, res) => {
       max_tokens: 500
     });
 
-    console.log('OpenAI response:', completion.choices[0].message);
-    res.json({ message: completion.choices[0].message.content });
+    const response = completion.choices[0].message.content;
+    console.log('OpenAI response:', response);
+
+    // Log the chat message to the database
+    try {
+      const { error: insertError } = await supabase
+        .from('chat_messages')
+        .insert({
+          user_id: req.body.userId,
+          user_message: req.body.message,
+          bot_response: response
+        });
+
+      if (insertError) {
+        console.error('Error logging chat message:', insertError);
+        // Don't throw the error, just log it - we still want to return the response to the user
+      }
+    } catch (error) {
+      console.error('Error logging chat message:', error);
+      // Don't throw the error, just log it - we still want to return the response to the user
+    }
+
+    res.json({ message: response });
   } catch (error) {
     console.error('Chat endpoint error:', error);
     res.status(500).json({ 
