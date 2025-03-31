@@ -216,12 +216,32 @@ function Profile() {
         throw new Error('User not authenticated');
       }
 
-      const { error } = await supabase
+      // First check if a record exists
+      const { data: existingReminder, error: fetchError } = await supabase
         .from('user_reminders')
-        .upsert({
-          user_id: user.id,
-          reminders: reminders
-        });
+        .select()
+        .eq('user_id', user.id)
+        .single();
+
+      if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is "not found" error
+        throw fetchError;
+      }
+
+      let error;
+      if (existingReminder) {
+        // Update existing record
+        const { error: updateError } = await supabase
+          .from('user_reminders')
+          .update({ reminders: reminders })
+          .eq('user_id', user.id);
+        error = updateError;
+      } else {
+        // Insert new record
+        const { error: insertError } = await supabase
+          .from('user_reminders')
+          .insert({ user_id: user.id, reminders: reminders });
+        error = insertError;
+      }
 
       if (error) throw error;
       handleCloseReminderDialog();
