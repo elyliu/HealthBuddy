@@ -16,7 +16,7 @@ import AddActivityDialog from './AddActivityDialog';
 
 function ActivitiesTab({ activities, onActivityAdded }) {
   const [showAddActivity, setShowAddActivity] = useState(false);
-  const [error, setError] = useState(null);
+  const [error] = useState(null);
 
   // Add effect to log when activities change
   useEffect(() => {
