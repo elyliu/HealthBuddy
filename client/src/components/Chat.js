@@ -12,20 +12,15 @@ import {
   Avatar,
   CircularProgress,
   Alert,
-  Fab,
-  Tabs,
-  Tab,
   useTheme,
   alpha
 } from '@mui/material';
 import {
-  Send as SendIcon,
-  Add as AddIcon
+  Send as SendIcon
 } from '@mui/icons-material';
 import { supabase } from '../lib/supabaseClient';
 import config from '../config';
 import AddActivityDialog from './AddActivityDialog';
-import ActivitiesTab from './ActivitiesTab';
 import WelcomeModal from './WelcomeModal';
 import { keyframes } from '@mui/system';
 
@@ -37,15 +32,13 @@ const loadingDots = keyframes`
   80%, 100% { content: ''; }
 `;
 
-function Chat() {
+function Chat({ activities, onActivityAdded }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showAddActivity, setShowAddActivity] = useState(false);
-  const [activities, setActivities] = useState([]);
   const [goals, setGoals] = useState([]);
-  const [currentTab, setCurrentTab] = useState(0);
   const [thingsToKeepInMind, setThingsToKeepInMind] = useState('');
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [user, setUser] = useState(null);
@@ -70,17 +63,14 @@ function Chat() {
       if (messages.length > 0) {
         console.log('Messages already exist, skipping welcome message');
         // Still fetch the data but don't show welcome message
-        const [activitiesResponse, remindersResponse, goalsResponse] = await Promise.all([
-          supabase.from('activities').select('*').eq('user_id', user.id).order('date', { ascending: false }),
+        const [remindersResponse, goalsResponse] = await Promise.all([
           supabase.from('user_reminders').select('reminders').eq('user_id', user.id),
           supabase.from('goals').select('*').eq('user_id', user.id)
         ]);
 
-        if (activitiesResponse.error) throw activitiesResponse.error;
         if (remindersResponse.error) throw remindersResponse.error;
         if (goalsResponse.error) throw goalsResponse.error;
 
-        setActivities(activitiesResponse.data || []);
         setThingsToKeepInMind(remindersResponse.data?.[0]?.reminders || '');
         setGoals(goalsResponse.data || []);
         return;
@@ -89,14 +79,12 @@ function Chat() {
       console.log('Fetching data for user:', user.id);
       
       // Fetch all data in parallel
-      const [activitiesResponse, remindersResponse, profileResponse, goalsResponse] = await Promise.all([
-        supabase.from('activities').select('*').eq('user_id', user.id).order('date', { ascending: false }),
+      const [remindersResponse, profileResponse, goalsResponse] = await Promise.all([
         supabase.from('user_reminders').select('reminders').eq('user_id', user.id),
         supabase.from('profiles').select('has_seen_welcome').eq('id', user.id).single(),
         supabase.from('goals').select('*').eq('user_id', user.id)
       ]);
 
-      if (activitiesResponse.error) throw activitiesResponse.error;
       if (remindersResponse.error) throw remindersResponse.error;
       if (profileResponse.error) {
         console.error('Profile fetch error:', profileResponse.error);
@@ -109,7 +97,6 @@ function Chat() {
 
       console.log('Goals data:', goalsResponse.data);
 
-      setActivities(activitiesResponse.data || []);
       setThingsToKeepInMind(remindersResponse.data?.[0]?.reminders || '');
       setGoals(goalsResponse.data || []);
 
@@ -132,7 +119,7 @@ function Chat() {
             : "Welcome back! How can I help you today?",
           userId: user.id,
           context: {
-            recentActivities: (activitiesResponse.data || []).slice(0, 5).map(activity => ({
+            recentActivities: activities.slice(0, 5).map(activity => ({
               description: activity.description,
               date: activity.date
             })),
@@ -182,7 +169,7 @@ function Chat() {
       console.error('Error fetching data:', error);
       setError('Failed to load data. Please try again.');
     }
-  }, [user?.id, messages.length]);
+  }, [user?.id, messages.length, activities]);
 
   // Separate data fetching from welcome message handling
   const initializeUserData = useCallback(async () => {
@@ -361,21 +348,28 @@ function Chat() {
     }
   };
 
-  const handleTabChange = (event, newValue) => {
-    setCurrentTab(newValue);
+  // Add effect to log when activities change
+  useEffect(() => {
+    console.log('Activities updated in Chat:', activities);
+  }, [activities]);
+
+  const handleActivityAdded = async (newActivity) => {
+    console.log('Activity added in Chat, calling onActivityAdded with:', newActivity);
+    await onActivityAdded(newActivity);
+    setShowAddActivity(false);
   };
 
   return (
     <Container 
       maxWidth="md" 
       sx={{ 
-        height: 'calc(100vh - 88px)', // Account for navbar (64px) and margin (24px)
+        height: 'calc(100vh - 88px)',
         display: 'flex',
         flexDirection: 'column',
-        pt: 1, // Increase top padding slightly
+        pt: 1,
         pb: 1,
         px: 1,
-        mt: '76px' // Adjust margin-top for better spacing
+        mt: '76px'
       }}
     >
       <Box sx={{ 
@@ -387,239 +381,178 @@ function Chat() {
         position: 'relative',
         overflow: 'hidden'
       }}>
-        <Box sx={{ 
-          borderBottom: 1, 
-          borderColor: 'divider',
-          bgcolor: 'background.default',
-          zIndex: 1000
-        }}>
-          <Tabs 
-            value={currentTab} 
-            onChange={handleTabChange}
-            sx={{ 
-              px: 2,
-              '& .MuiTab-root': {
-                textTransform: 'none',
-                fontWeight: 'bold',
-                fontSize: '1rem',
-                py: 0.75 // Slightly increase tab padding
-              }
-            }}
-          >
-            <Tab label="Chat" />
-            <Tab label="Activities" />
-          </Tabs>
-        </Box>
+        {error && (
+          <Alert severity="error" sx={{ m: 2, borderRadius: 2 }}>
+            {error}
+          </Alert>
+        )}
 
-        {/* Content area */}
-        <Box sx={{ 
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden' // Important for nested scroll
-        }}>
-          {currentTab === 1 && (
-            <Box sx={{ position: 'absolute', top: 8, right: 16, zIndex: 1001 }}>
-              <Fab
-                color="error"
-                aria-label="add activity"
-                onClick={() => setShowAddActivity(true)}
+        <List 
+          ref={messagesEndRef}
+          sx={{ 
+            flex: 1,
+            overflow: 'auto',
+            px: 2,
+            py: 1,
+            bgcolor: alpha(theme.palette.primary.main, 0.03)
+          }}
+        >
+          {messages.map((message, index) => (
+            <ListItem 
+              key={index} 
+              sx={{ 
+                flexDirection: 'column',
+                alignItems: message.sender === 'You' ? 'flex-end' : 'flex-start',
+                mb: 0.5
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.25 }}>
+                {message.sender !== 'You' && (
+                  <ListItemAvatar sx={{ minWidth: 52 }}>
+                    <Avatar 
+                      sx={{ 
+                        width: 48, 
+                        height: 48,
+                        background: 'none'
+                      }}
+                      src="/healthbuddy_logo_round.png"
+                    />
+                  </ListItemAvatar>
+                )}
+                <Typography variant="caption" color="text.secondary">
+                  {message.sender}
+                </Typography>
+              </Box>
+              <Paper
+                elevation={0}
                 sx={{
-                  background: 'linear-gradient(135deg, #FF4081 0%, #C2185B 100%)',
-                  boxShadow: '0 4px 20px rgba(244, 67, 54, 0.3)',
+                  p: 1.25,
+                  maxWidth: '95%',
+                  ml: message.sender === 'You' ? 0 : '52px',
+                  background: message.sender === 'You' 
+                    ? 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)'
+                    : 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
+                  color: message.sender === 'You' ? 'white' : 'text.primary',
+                  borderRadius: 2,
+                  boxShadow: message.sender === 'You'
+                    ? '0 4px 20px rgba(33, 150, 243, 0.2)'
+                    : '0 4px 20px rgba(0, 0, 0, 0.05)',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                  transition: 'transform 0.2s',
                   '&:hover': {
-                    background: 'linear-gradient(135deg, #FF4081 0%, #C2185B 100%)',
-                    boxShadow: '0 6px 25px rgba(244, 67, 54, 0.4)'
+                    transform: 'translateY(-2px)'
                   }
                 }}
               >
-                <AddIcon />
-              </Fab>
-            </Box>
-          )}
+                <Typography variant="body1">
+                  {message.content}
+                </Typography>
+              </Paper>
+            </ListItem>
+          ))}
 
-          {error && (
-            <Alert severity="error" sx={{ m: 2, borderRadius: 2 }}>
-              {error}
-            </Alert>
-          )}
-
-          {currentTab === 0 ? (
-            <>
-              <List 
-                ref={messagesEndRef}
-                sx={{ 
-                  flex: 1,
-                  overflow: 'auto',
-                  px: 2,
-                  py: 1,
-                  bgcolor: alpha(theme.palette.primary.main, 0.03)
+          {isTyping && (
+            <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', mb: 0.5 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.25 }}>
+                <ListItemAvatar sx={{ minWidth: 52 }}>
+                  <Avatar 
+                    sx={{ 
+                      width: 48, 
+                      height: 48,
+                      background: 'none'
+                    }}
+                    src="/healthbuddy_logo_round.png"
+                  />
+                </ListItemAvatar>
+                <Typography variant="caption" color="text.secondary">
+                  HealthBuddy
+                </Typography>
+              </Box>
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 1.25,
+                  maxWidth: '95%',
+                  ml: '52px',
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
+                  borderRadius: 2,
+                  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
+                  position: 'relative',
+                  minWidth: '100px'
                 }}
               >
-                {messages.map((message, index) => (
-                  <ListItem 
-                    key={index} 
-                    sx={{ 
-                      flexDirection: 'column',
-                      alignItems: message.sender === 'You' ? 'flex-end' : 'flex-start',
-                      mb: 0.5
-                    }}
-                  >
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.25 }}>
-                      {message.sender !== 'You' && (
-                        <ListItemAvatar sx={{ minWidth: 52 }}>
-                          <Avatar 
-                            sx={{ 
-                              width: 48, 
-                              height: 48,
-                              background: 'none'
-                            }}
-                            src="/healthbuddy_logo_round.png"
-                          />
-                        </ListItemAvatar>
-                      )}
-                      <Typography variant="caption" color="text.secondary">
-                        {message.sender}
-                      </Typography>
-                    </Box>
-                    <Paper
-                      elevation={0}
-                      sx={{
-                        p: 1.25,
-                        maxWidth: '95%',
-                        ml: message.sender === 'You' ? 0 : '52px',
-                        background: message.sender === 'You' 
-                          ? 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)'
-                          : 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
-                        color: message.sender === 'You' ? 'white' : 'text.primary',
-                        borderRadius: 2,
-                        boxShadow: message.sender === 'You'
-                          ? '0 4px 20px rgba(33, 150, 243, 0.2)'
-                          : '0 4px 20px rgba(0, 0, 0, 0.05)',
-                        whiteSpace: 'pre-wrap',
-                        wordBreak: 'break-word',
-                        transition: 'transform 0.2s',
-                        '&:hover': {
-                          transform: 'translateY(-2px)'
-                        }
-                      }}
-                    >
-                      <Typography variant="body1">
-                        {message.content}
-                      </Typography>
-                    </Paper>
-                  </ListItem>
-                ))}
-
-                {isTyping && (
-                  <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', mb: 0.5 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.25 }}>
-                      <ListItemAvatar sx={{ minWidth: 52 }}>
-                        <Avatar 
-                          sx={{ 
-                            width: 48, 
-                            height: 48,
-                            background: 'none'
-                          }}
-                          src="/healthbuddy_logo_round.png"
-                        />
-                      </ListItemAvatar>
-                      <Typography variant="caption" color="text.secondary">
-                        HealthBuddy
-                      </Typography>
-                    </Box>
-                    <Paper
-                      elevation={0}
-                      sx={{
-                        p: 1.25,
-                        maxWidth: '95%',
-                        ml: '52px',
-                        background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
-                        borderRadius: 2,
-                        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
-                        position: 'relative',
-                        minWidth: '100px'
-                      }}
-                    >
-                      <Typography variant="body1">
-                        <Box
-                          component="span"
-                          sx={{
-                            '&::after': {
-                              content: '""',
-                              animation: `${loadingDots} 1.5s infinite`,
-                              display: 'inline-block',
-                              width: '1em',
-                              textAlign: 'left'
-                            }
-                          }}
-                        >
-                          Typing
-                        </Box>
-                      </Typography>
-                    </Paper>
-                  </ListItem>
-                )}
-                <div ref={messagesEndRef} />
-              </List>
-
-              <Box sx={{ 
-                p: 2, 
-                borderTop: 1, 
-                borderColor: 'divider',
-                bgcolor: 'background.paper'
-              }}>
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                  <TextField
-                    fullWidth
-                    multiline
-                    maxRows={4}
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="Type a message..."
-                    disabled={loading}
+                <Typography variant="body1">
+                  <Box
+                    component="span"
                     sx={{
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: 3
-                      }
-                    }}
-                  />
-                  <IconButton 
-                    onClick={handleSend}
-                    disabled={!input.trim() || loading}
-                    sx={{
-                      alignSelf: 'flex-end',
-                      background: theme.palette.primary.main,
-                      color: 'white',
-                      width: 48,
-                      height: 48,
-                      '&:hover': {
-                        background: theme.palette.primary.dark
-                      },
-                      '&.Mui-disabled': {
-                        background: theme.palette.action.disabledBackground,
-                        color: theme.palette.action.disabled
+                      '&::after': {
+                        content: '""',
+                        animation: `${loadingDots} 1.5s infinite`,
+                        display: 'inline-block',
+                        width: '1em',
+                        textAlign: 'left'
                       }
                     }}
                   >
-                    {loading ? <CircularProgress size={24} color="inherit" /> : <SendIcon />}
-                  </IconButton>
-                </Box>
-              </Box>
-            </>
-          ) : (
-            <ActivitiesTab 
-              activities={activities} 
-              onActivityAdded={fetchData}
-            />
+                    Typing
+                  </Box>
+                </Typography>
+              </Paper>
+            </ListItem>
           )}
+          <div ref={messagesEndRef} />
+        </List>
+
+        <Box sx={{ 
+          p: 2, 
+          borderTop: 1, 
+          borderColor: 'divider',
+          bgcolor: 'background.paper'
+        }}>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <TextField
+              fullWidth
+              multiline
+              maxRows={4}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Type a message..."
+              disabled={loading}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 3
+                }
+              }}
+            />
+            <IconButton 
+              onClick={handleSend}
+              disabled={!input.trim() || loading}
+              sx={{
+                alignSelf: 'flex-end',
+                background: theme.palette.primary.main,
+                color: 'white',
+                width: 48,
+                height: 48,
+                '&:hover': {
+                  background: theme.palette.primary.dark
+                },
+                '&.Mui-disabled': {
+                  background: theme.palette.action.disabledBackground,
+                  color: theme.palette.action.disabled
+                }
+              }}
+            >
+              {loading ? <CircularProgress size={24} color="inherit" /> : <SendIcon />}
+            </IconButton>
+          </Box>
         </Box>
 
         <AddActivityDialog
           open={showAddActivity}
           onClose={() => setShowAddActivity(false)}
-          onActivityAdded={fetchData}
+          onActivityAdded={handleActivityAdded}
         />
 
         <WelcomeModal

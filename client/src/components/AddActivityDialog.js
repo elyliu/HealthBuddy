@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import { supabase } from '../lib/supabaseClient';
 
-function AddActivityDialog({ open, onClose }) {
+function AddActivityDialog({ open, onClose, onActivityAdded }) {
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -35,22 +35,18 @@ function AddActivityDialog({ open, onClose }) {
       }
       console.log('Current user:', user);
 
-      // Insert the activity
-      console.log('Inserting activity with data:', {
+      const newActivity = {
         user_id: user.id,
         description: description,
         date: new Date().toISOString()
-      });
+      };
+
+      // Insert the activity
+      console.log('Inserting activity with data:', newActivity);
 
       const { data, error: insertError } = await supabase
         .from('activities')
-        .insert([
-          {
-            user_id: user.id,
-            description: description,
-            date: new Date().toISOString()
-          }
-        ])
+        .insert([newActivity])
         .select();
 
       if (insertError) {
@@ -59,6 +55,11 @@ function AddActivityDialog({ open, onClose }) {
       }
 
       console.log('Activity inserted successfully:', data);
+
+      // Pass the new activity back to parent
+      if (data && data[0]) {
+        onActivityAdded(data[0]);
+      }
 
       // Clear form and close dialog
       setDescription('');
