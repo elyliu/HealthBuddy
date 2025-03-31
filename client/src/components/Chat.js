@@ -20,8 +20,7 @@ import {
 } from '@mui/material';
 import {
   Send as SendIcon,
-  Add as AddIcon,
-  Person as PersonIcon
+  Add as AddIcon
 } from '@mui/icons-material';
 import { supabase } from '../lib/supabaseClient';
 import config from '../config';
@@ -117,72 +116,20 @@ function Chat() {
       // Log the goals state after setting it
       console.log('Goals state after setting:', goalsResponse.data || []);
 
-      // Check if this is a new user who hasn't seen the welcome message
-      if (profileResponse.data && !profileResponse.data.has_seen_welcome) {
-        console.log('New user detected in Chat, showing welcome modal and message');
-        setShowWelcomeModal(true);
-        
-        // Only add welcome message if there are no messages yet
-        if (messages.length === 0) {
-          // Add initial welcome message
-          const requestBody = {
-            message: "Hi! I'm your AI health buddy. How can I help you today?",
-            userId: user.id,
-            context: {
-              recentActivities: (activitiesResponse.data || []).slice(0, 5).map(activity => ({
-                description: activity.description,
-                date: activity.date
-              })),
-              thingsToKeepInMind: remindersResponse.data?.[0]?.reminders || '',
-              goals: goalsResponse.data.map(goal => ({
-                description: goal.goal_text
-              }))
-            },
-            systemPrompt: `Your name is Ellie.  You are a supportive, positive, and empathetic AI health buddy. Your role is to help users maintain and improve their long-term and sustainable healthy habits. Strive for consistency rather than quick fixes.
-            You have access to their recent activities, personal reminders, and goals. Use this information to provide personalized, relevant advice and encouragement. 
-            Keep responses to 2-3 sentences maximum unless the user asks for more. Keep your responses friendly and focused on health and fitness goals—avoid jargon when possible. 
-            If a user's question suggests they need medical attention, advise them to consult a qualified healthcare professional.  Maybe ask questions at the end to encourage a dialogue or suggest activities to make small incremental progress toward their goals.
-            If the user starts describing what they did recently, remind them to add the activities in the Activities tab, but don't ask them to do it every time.
-            Things you want to encourage:
-            Small, incremental changes to avoid burnout or injury. Emphasizing that consistency is key—flex goals rather than skip them.
-            Encouraging any form of physical activity—not just formal workouts.
-            Including strength training where feasible.
-            Reducing sugar intake and increasing protein and fiber intake.`
-          };
-
-          console.log('Sending initial welcome message request');
-          const response = await fetch(`${config.serverUrl}/api/chat`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestBody),
-          });
-
-          if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Welcome message request failed:', errorText);
-            throw new Error(`Failed to get welcome message: ${response.status} ${errorText}`);
-          }
-
-          const data = await response.json();
-          console.log('Welcome message response:', data);
-          
-          if (!data.message) {
-            throw new Error('Invalid response from server');
-          }
-
-          // Update messages state with the welcome message
-          setMessages([{
-            sender: 'HealthBuddy',
-            content: data.message,
-            timestamp: new Date()
-          }]);
+      // Only proceed with welcome message if there are no messages
+      if (messages.length === 0) {
+        // Check if this is a new user
+        const isNewUser = profileResponse.data && !profileResponse.data.has_seen_welcome;
+        if (isNewUser) {
+          console.log('New user detected in Chat, showing welcome modal');
+          setShowWelcomeModal(true);
         }
-      } else if (messages.length === 0) {
-        // Add welcome back message for existing users
+
+        // Prepare welcome message request
         const requestBody = {
-          message: "Welcome back! How can I help you today?",
+          message: isNewUser 
+            ? "Hi! I'm your AI health buddy. How can I help you today?"
+            : "Welcome back! How can I help you today?",
           userId: user.id,
           context: {
             recentActivities: (activitiesResponse.data || []).slice(0, 5).map(activity => ({
@@ -195,17 +142,18 @@ function Chat() {
             }))
           },
           systemPrompt: `Your name is Ellie.  You are a supportive, positive, and empathetic AI health buddy. Your role is to help users maintain and improve their long-term and sustainable healthy habits. Strive for consistency rather than quick fixes.
-            You have access to their recent activities, personal reminders, and goals. Use this information to provide personalized, relevant advice and encouragement. 
-            Keep responses to 2-3 sentences maximum unless the user asks for more. Keep your responses friendly and focused on health and fitness goals—avoid jargon when possible. 
-            If a user's question suggests they need medical attention, advise them to consult a qualified healthcare professional.  Maybe ask questions at the end to encourage a dialogue or suggest activities to make small incremental progress toward their goals.
-            If the user starts describing what they did recently, remind them to add the activities in the Activities tab, but don't ask them to do it every time.
-            Things you want to encourage:
-            Small, incremental changes to avoid burnout or injury. Emphasizing that consistency is key—flex goals rather than skip them.
-            Encouraging any form of physical activity—not just formal workouts.
-            Including strength training where feasible.
-            Reducing sugar intake and increasing protein and fiber intake.`
+          You have access to their recent activities, personal reminders, and goals. Use this information to provide personalized, relevant advice and encouragement. 
+          Keep responses to 2-3 sentences maximum unless the user asks for more. Keep your responses friendly and focused on health and fitness goals—avoid jargon when possible. 
+          If a user's question suggests they need medical attention, advise them to consult a qualified healthcare professional.  Maybe ask questions at the end to encourage a dialogue or suggest activities to make small incremental progress toward their goals.
+          If the user starts describing what they did recently, remind them to add the activities in the Activities tab, but don't ask them to do it every time.
+          Things you want to encourage:
+          Small, incremental changes to avoid burnout or injury. Emphasizing that consistency is key—flex goals rather than skip them.
+          Encouraging any form of physical activity—not just formal workouts.
+          Including strength training where feasible.
+          Reducing sugar intake and increasing protein and fiber intake.`
         };
 
+        console.log('Sending welcome message request');
         const response = await fetch(`${config.serverUrl}/api/chat`, {
           method: 'POST',
           headers: {
@@ -216,22 +164,25 @@ function Chat() {
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error('Welcome back message request failed:', errorText);
-          throw new Error(`Failed to get welcome back message: ${response.status} ${errorText}`);
+          console.error('Welcome message request failed:', errorText);
+          throw new Error(`Failed to get welcome message: ${response.status} ${errorText}`);
         }
 
         const data = await response.json();
+        console.log('Welcome message response:', data);
+        
         if (!data.message) {
           throw new Error('Invalid response from server');
         }
 
+        // Update messages state with the welcome message
         setMessages([{
           sender: 'HealthBuddy',
           content: data.message,
           timestamp: new Date()
         }]);
       } else {
-        console.log('User has already seen welcome message or no profile data');
+        console.log('User has existing messages, skipping welcome message');
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -360,9 +311,6 @@ function Chat() {
         Including strength training where feasible.
         Reducing sugar intake and increasing protein and fiber intake.`
       };
-
-      console.log('Raw goals from state:', goals);
-      console.log('Mapped goals in request:', requestBody.context.goals);
 
       console.log('Sending chat request with context:', requestBody.context);
 
