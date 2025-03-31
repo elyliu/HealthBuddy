@@ -67,6 +67,26 @@ function Chat() {
         return;
       }
 
+      // Skip welcome message if we already have messages
+      if (messages.length > 0) {
+        console.log('Messages already exist, skipping welcome message');
+        // Still fetch the data but don't show welcome message
+        const [activitiesResponse, remindersResponse, goalsResponse] = await Promise.all([
+          supabase.from('activities').select('*').eq('user_id', user.id).order('date', { ascending: false }),
+          supabase.from('user_reminders').select('reminders').eq('user_id', user.id),
+          supabase.from('goals').select('*').eq('user_id', user.id)
+        ]);
+
+        if (activitiesResponse.error) throw activitiesResponse.error;
+        if (remindersResponse.error) throw remindersResponse.error;
+        if (goalsResponse.error) throw goalsResponse.error;
+
+        setActivities(activitiesResponse.data || []);
+        setThingsToKeepInMind(remindersResponse.data?.[0]?.reminders || '');
+        setGoals(goalsResponse.data || []);
+        return;
+      }
+
       console.log('Fetching data for user:', user.id);
       
       // Fetch all data in parallel
@@ -219,6 +239,12 @@ function Chat() {
     }
   }, [user?.id, messages.length]);
 
+  // Separate data fetching from welcome message handling
+  const initializeUserData = useCallback(async () => {
+    if (!user?.id) return;
+    await fetchData();
+  }, [user?.id, fetchData]);
+
   // Add useEffect to set user and fetch data
   useEffect(() => {
     const checkUser = async () => {
@@ -235,7 +261,7 @@ function Chat() {
         if (session?.user) {
           console.log('Setting user:', session.user);
           setUser(session.user);
-          await fetchData();
+          await initializeUserData();
         }
       } catch (error) {
         console.error('Error checking user:', error);
@@ -251,7 +277,10 @@ function Chat() {
       if (session?.user) {
         console.log('Setting user from auth change:', session.user);
         setUser(session.user);
-        await fetchData();
+        // Only fetch data on sign_in event to prevent duplicate welcome messages
+        if (event === 'SIGNED_IN') {
+          await initializeUserData();
+        }
       } else {
         setUser(null);
         setMessages([]);
@@ -259,7 +288,7 @@ function Chat() {
     });
 
     return () => subscription.unsubscribe();
-  }, [fetchData]);
+  }, [initializeUserData]);
 
   useEffect(() => {
     scrollToBottom();
