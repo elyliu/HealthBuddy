@@ -462,10 +462,10 @@ function Chat() {
                     sx={{ 
                       flexDirection: 'column',
                       alignItems: message.sender === 'You' ? 'flex-end' : 'flex-start',
-                      mb: 2
+                      mb: 0.5
                     }}
                   >
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.25 }}>
                       {message.sender !== 'You' && (
                         <ListItemAvatar sx={{ minWidth: 52 }}>
                           <Avatar 
@@ -485,7 +485,7 @@ function Chat() {
                     <Paper
                       elevation={0}
                       sx={{
-                        p: 2,
+                        p: 1.25,
                         maxWidth: '95%',
                         ml: message.sender === 'You' ? 0 : '52px',
                         background: message.sender === 'You' 
@@ -507,27 +507,13 @@ function Chat() {
                       <Typography variant="body1">
                         {message.content}
                       </Typography>
-                      <Typography 
-                        variant="caption" 
-                        sx={{ 
-                          display: 'block', 
-                          mt: 1,
-                          opacity: 0.7,
-                          textAlign: 'right'
-                        }}
-                      >
-                        {message.timestamp.toLocaleTimeString([], { 
-                          hour: '2-digit', 
-                          minute: '2-digit' 
-                        })}
-                      </Typography>
                     </Paper>
                   </ListItem>
                 ))}
 
                 {isTyping && (
-                  <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', mb: 2 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                  <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', mb: 0.5 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.25 }}>
                       <ListItemAvatar sx={{ minWidth: 52 }}>
                         <Avatar 
                           sx={{ 
@@ -545,7 +531,7 @@ function Chat() {
                     <Paper
                       elevation={0}
                       sx={{
-                        p: 2,
+                        p: 1.25,
                         maxWidth: '95%',
                         ml: '52px',
                         background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
