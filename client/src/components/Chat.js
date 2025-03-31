@@ -366,43 +366,60 @@ function Chat() {
   };
 
   return (
-    <Container maxWidth="md" sx={{ height: 'calc(100vh - 180px)', py: 1 }}>
-      <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-        <Paper 
-          elevation={0}
-          sx={{ 
-            flex: 1, 
-            display: 'flex', 
-            flexDirection: 'column',
-            overflow: 'hidden',
-            position: 'relative',
-            border: '1px solid',
-            borderColor: 'divider',
-            borderRadius: 2,
-            background: 'rgba(255, 255, 255, 0.8)',
-            backdropFilter: 'blur(10px)'
-          }}
-        >
-          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-            <Tabs 
-              value={currentTab} 
-              onChange={handleTabChange}
-              sx={{ 
-                px: 2,
-                '& .MuiTab-root': {
-                  textTransform: 'none',
-                  fontWeight: 'bold',
-                  fontSize: '1rem'
-                }
-              }}
-            >
-              <Tab label="Chat" />
-              <Tab label="Activities" />
-            </Tabs>
-          </Box>
+    <Container 
+      maxWidth="md" 
+      sx={{ 
+        height: 'calc(100vh - 88px)', // Account for navbar (64px) and margin (24px)
+        display: 'flex',
+        flexDirection: 'column',
+        pt: 1, // Increase top padding slightly
+        pb: 1,
+        px: 1,
+        mt: '76px' // Adjust margin-top for better spacing
+      }}
+    >
+      <Box sx={{ 
+        flex: 1,
+        display: 'flex', 
+        flexDirection: 'column',
+        bgcolor: 'background.default',
+        borderRadius: 2,
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <Box sx={{ 
+          borderBottom: 1, 
+          borderColor: 'divider',
+          bgcolor: 'background.default',
+          zIndex: 1000
+        }}>
+          <Tabs 
+            value={currentTab} 
+            onChange={handleTabChange}
+            sx={{ 
+              px: 2,
+              '& .MuiTab-root': {
+                textTransform: 'none',
+                fontWeight: 'bold',
+                fontSize: '1rem',
+                py: 0.75 // Slightly increase tab padding
+              }
+            }}
+          >
+            <Tab label="Chat" />
+            <Tab label="Activities" />
+          </Tabs>
+        </Box>
 
+        {/* Content area */}
+        <Box sx={{ 
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden' // Important for nested scroll
+        }}>
           {currentTab === 1 && (
-            <Box sx={{ position: 'absolute', top: 8, right: 16, zIndex: 1000 }}>
+            <Box sx={{ position: 'absolute', top: 8, right: 16, zIndex: 1001 }}>
               <Fab
                 color="error"
                 aria-label="add activity"
@@ -430,24 +447,13 @@ function Chat() {
           {currentTab === 0 ? (
             <>
               <List 
+                ref={messagesEndRef}
                 sx={{ 
-                  flex: 1, 
-                  overflow: 'auto', 
-                  p: 2,
-                  '&::-webkit-scrollbar': {
-                    width: '8px',
-                  },
-                  '&::-webkit-scrollbar-track': {
-                    background: alpha(theme.palette.primary.main, 0.1),
-                    borderRadius: '4px',
-                  },
-                  '&::-webkit-scrollbar-thumb': {
-                    background: alpha(theme.palette.primary.main, 0.3),
-                    borderRadius: '4px',
-                    '&:hover': {
-                      background: alpha(theme.palette.primary.main, 0.5),
-                    },
-                  },
+                  flex: 1,
+                  overflow: 'auto',
+                  px: 2,
+                  py: 1,
+                  bgcolor: alpha(theme.palette.primary.main, 0.03)
                 }}
               >
                 {messages.map((message, index) => (
@@ -481,7 +487,7 @@ function Chat() {
                       sx={{
                         p: 2,
                         maxWidth: '95%',
-                        ml: message.sender === 'You' ? 0 : '52px', // Add margin to align with avatar
+                        ml: message.sender === 'You' ? 0 : '52px',
                         background: message.sender === 'You' 
                           ? 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)'
                           : 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
@@ -518,6 +524,7 @@ function Chat() {
                     </Paper>
                   </ListItem>
                 ))}
+
                 {isTyping && (
                   <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', mb: 2 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
@@ -540,7 +547,7 @@ function Chat() {
                       sx={{
                         p: 2,
                         maxWidth: '95%',
-                        ml: '52px', // Add margin to align with avatar
+                        ml: '52px',
                         background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
                         borderRadius: 2,
                         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
@@ -570,56 +577,43 @@ function Chat() {
                 <div ref={messagesEndRef} />
               </List>
 
-              <Box 
-                sx={{ 
-                  p: 2, 
-                  borderTop: 1, 
-                  borderColor: 'divider',
-                  background: 'rgba(255, 255, 255, 0.9)',
-                  backdropFilter: 'blur(10px)',
-                  position: 'sticky',
-                  bottom: 0
-                }}
-              >
+              <Box sx={{ 
+                p: 2, 
+                borderTop: 1, 
+                borderColor: 'divider',
+                bgcolor: 'background.paper'
+              }}>
                 <Box sx={{ display: 'flex', gap: 1 }}>
                   <TextField
                     fullWidth
                     multiline
-                    maxRows={3}
+                    maxRows={4}
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder="Type your message..."
+                    placeholder="Type a message..."
                     disabled={loading}
                     sx={{
                       '& .MuiOutlinedInput-root': {
-                        backgroundColor: 'white',
-                        borderRadius: 2,
-                        '&:hover': {
-                          '& .MuiOutlinedInput-notchedOutline': {
-                            borderColor: 'primary.main',
-                          },
-                        },
-                      },
+                        borderRadius: 3
+                      }
                     }}
                   />
                   <IconButton 
-                    color="primary" 
-                    onClick={handleSend} 
+                    onClick={handleSend}
                     disabled={!input.trim() || loading}
                     sx={{
                       alignSelf: 'flex-end',
-                      mb: 0.5,
-                      background: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)',
+                      background: theme.palette.primary.main,
                       color: 'white',
-                      boxShadow: '0 4px 20px rgba(33, 150, 243, 0.3)',
+                      width: 48,
+                      height: 48,
                       '&:hover': {
-                        background: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)',
-                        boxShadow: '0 6px 25px rgba(33, 150, 243, 0.4)'
+                        background: theme.palette.primary.dark
                       },
                       '&.Mui-disabled': {
-                        background: 'rgba(0, 0, 0, 0.12)',
-                        boxShadow: 'none'
+                        background: theme.palette.action.disabledBackground,
+                        color: theme.palette.action.disabled
                       }
                     }}
                   >
@@ -629,23 +623,24 @@ function Chat() {
               </Box>
             </>
           ) : (
-            <ActivitiesTab activities={activities} />
+            <ActivitiesTab 
+              activities={activities} 
+              onActivityAdded={fetchData}
+            />
           )}
-        </Paper>
+        </Box>
+
+        <AddActivityDialog
+          open={showAddActivity}
+          onClose={() => setShowAddActivity(false)}
+          onActivityAdded={fetchData}
+        />
+
+        <WelcomeModal
+          open={showWelcomeModal}
+          onClose={handleWelcomeModalClose}
+        />
       </Box>
-
-      <AddActivityDialog 
-        open={showAddActivity} 
-        onClose={() => {
-          setShowAddActivity(false);
-          fetchData();
-        }} 
-      />
-
-      <WelcomeModal
-        open={showWelcomeModal}
-        onClose={handleWelcomeModalClose}
-      />
     </Container>
   );
 }
