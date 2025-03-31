@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { Container, Box } from '@mui/material';
+import { Box } from '@mui/material';
 import Navbar from './components/Navbar';
 import Chat from './components/Chat';
 import Profile from './components/Profile';

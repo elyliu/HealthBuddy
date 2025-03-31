@@ -14,8 +14,7 @@ import {
   TimelineDot
 } from '@mui/lab';
 import {
-  CalendarToday as CalendarIcon,
-  AccessTime as TimeIcon
+  CalendarToday as CalendarIcon
 } from '@mui/icons-material';
 
 function ActivitiesTab({ activities }) {

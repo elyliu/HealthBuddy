@@ -21,7 +21,6 @@ import {
 import {
   Send as SendIcon,
   Add as AddIcon,
-  SmartToy as BotIcon,
   Person as PersonIcon
 } from '@mui/icons-material';
 import { supabase } from '../lib/supabaseClient';

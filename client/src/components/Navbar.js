@@ -3,9 +3,7 @@ import {
   AppBar,
   Toolbar,
   Box,
-  IconButton,
-  useTheme,
-  useMediaQuery
+  IconButton
 } from '@mui/material';
 import {
   Chat as ChatIcon,
@@ -14,8 +12,6 @@ import {
 } from '@mui/icons-material';
 
 function Navbar({ currentView, onViewChange }) {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const navItems = [
     { label: 'Chat', icon: <ChatIcon />, value: 'chat' },
