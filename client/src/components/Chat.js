@@ -44,6 +44,8 @@ function Chat({ activities, onActivityAdded }) {
   const [user, setUser] = useState(null);
   const messagesEndRef = useRef(null);
   const [isTyping, setIsTyping] = useState(false);
+  const hasSentWelcomeRef = useRef(false);
+  const hasStartedWelcomeRef = useRef(false);
 
   const theme = useTheme();
 
@@ -51,28 +53,74 @@ function Chat({ activities, onActivityAdded }) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  // Separate function to handle welcome message
+  const sendWelcomeMessage = useCallback(async (userId, isNewUser, reminders, goals) => {
+    try {
+      console.log('[Welcome] Starting sendWelcomeMessage for user:', userId);
+      
+      const requestBody = {
+        message: isNewUser 
+          ? "Hi! I'm your AI health buddy. How can I help you today?"
+          : "Welcome back! How can I help you today?",
+        userId: userId,
+        context: {
+          recentActivities: activities.slice(0, 5).map(activity => ({
+            description: activity.description,
+            date: activity.date
+          })),
+          thingsToKeepInMind: reminders,
+          goals: goals.map(goal => ({
+            description: goal.goal_text
+          }))
+        },
+        systemPrompt: `Your name is Ellie.  You are a supportive, positive, and energetic AI health buddy. Your role is to help users maintain and improve their long-term and sustainable healthy habits. 
+        Let's start with some brief small talk and celebrate any recent wins to motivate them.  Keep response to 2-3 sentences max.
+        Maybe ask questions at the end to encourage a dialogue or suggest activities to make small incremental progress toward their goals.
+        `
+      };
+
+      console.log('[Welcome] Sending welcome message request');
+      const response = await fetch(`${config.serverUrl}/api/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[Welcome] Welcome message request failed:', errorText);
+        throw new Error(`Failed to get welcome message: ${response.status} ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('[Welcome] Welcome message response received');
+      
+      if (!data.message) {
+        throw new Error('Invalid response from server');
+      }
+
+      // Update messages state with the welcome message
+      setMessages([{
+        sender: 'HealthBuddy',
+        content: data.message,
+        timestamp: new Date()
+      }]);
+      
+      console.log('[Welcome] Messages updated, setting hasSentWelcomeRef to true');
+      hasSentWelcomeRef.current = true;
+    } catch (error) {
+      console.error('[Welcome] Error sending welcome message:', error);
+      setError('Failed to send welcome message. Please try again.');
+    }
+  }, [activities]);
+
   // Fetch activities and reminders
   const fetchData = useCallback(async () => {
     try {
       if (!user?.id) {
         console.log('No user ID available, skipping data fetch');
-        return;
-      }
-
-      // Skip welcome message if we already have messages
-      if (messages.length > 0) {
-        console.log('Messages already exist, skipping welcome message');
-        // Still fetch the data but don't show welcome message
-        const [remindersResponse, goalsResponse] = await Promise.all([
-          supabase.from('user_reminders').select('reminders').eq('user_id', user.id),
-          supabase.from('goals').select('*').eq('user_id', user.id)
-        ]);
-
-        if (remindersResponse.error) throw remindersResponse.error;
-        if (goalsResponse.error) throw goalsResponse.error;
-
-        setThingsToKeepInMind(remindersResponse.data?.[0]?.reminders || '');
-        setGoals(goalsResponse.data || []);
         return;
       }
 
@@ -96,89 +144,101 @@ function Chat({ activities, onActivityAdded }) {
       }
 
       console.log('Goals data:', goalsResponse.data);
-
       setThingsToKeepInMind(remindersResponse.data?.[0]?.reminders || '');
       setGoals(goalsResponse.data || []);
 
-      // Log the goals state after setting it
-      console.log('Goals state after setting:', goalsResponse.data || []);
-
-      // Only proceed with welcome message if there are no messages
-      if (messages.length === 0) {
-        // Check if this is a new user
-        const isNewUser = profileResponse.data && !profileResponse.data.has_seen_welcome;
-        if (isNewUser) {
-          console.log('New user detected in Chat, showing welcome modal');
-          setShowWelcomeModal(true);
-        }
-
-        // Prepare welcome message request
-        const requestBody = {
-          message: isNewUser 
-            ? "Hi! I'm your AI health buddy. How can I help you today?"
-            : "Welcome back! How can I help you today?",
-          userId: user.id,
-          context: {
-            recentActivities: activities.slice(0, 5).map(activity => ({
-              description: activity.description,
-              date: activity.date
-            })),
-            thingsToKeepInMind: remindersResponse.data?.[0]?.reminders || '',
-            goals: goalsResponse.data.map(goal => ({
-              description: goal.goal_text
-            }))
-          },
-          systemPrompt: `Your name is Ellie.  You are a supportive, positive, and energetic AI health buddy. Your role is to help users maintain and improve their long-term and sustainable healthy habits. 
-          Let's start with some brief small talk and celebrate any recent wins to motivate them.  Keep response to 2-3 sentences max.
-          Maybe ask questions at the end to encourage a dialogue or suggest activities to make small incremental progress toward their goals.
-          `
-        };
-
-        console.log('Sending welcome message request');
-        const response = await fetch(`${config.serverUrl}/api/chat`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(requestBody),
-        });
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('Welcome message request failed:', errorText);
-          throw new Error(`Failed to get welcome message: ${response.status} ${errorText}`);
-        }
-
-        const data = await response.json();
-        console.log('Welcome message response:', data);
-        
-        if (!data.message) {
-          throw new Error('Invalid response from server');
-        }
-
-        // Update messages state with the welcome message
-        setMessages([{
-          sender: 'HealthBuddy',
-          content: data.message,
-          timestamp: new Date()
-        }]);
-      } else {
-        console.log('User has existing messages, skipping welcome message');
+      // Check if this is a new user
+      const isNewUser = profileResponse.data && !profileResponse.data.has_seen_welcome;
+      
+      if (isNewUser) {
+        console.log('New user detected in Chat, showing welcome modal');
+        setShowWelcomeModal(true);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
       setError('Failed to load data. Please try again.');
     }
-  }, [user?.id, messages.length, activities]);
+  }, [user?.id]);
 
-  // Separate data fetching from welcome message handling
-  const initializeUserData = useCallback(async () => {
-    if (!user?.id) return;
-    await fetchData();
-  }, [user?.id, fetchData]);
+  // Separate effect for welcome message
+  useEffect(() => {
+    let mounted = true;
+
+    const sendInitialWelcomeMessage = async () => {
+      console.log('[Welcome] Checking conditions for welcome message:', {
+        userId: user?.id,
+        messagesLength: messages.length,
+        hasStartedWelcome: hasStartedWelcomeRef.current,
+        hasSentWelcome: hasSentWelcomeRef.current
+      });
+
+      if (!user?.id || messages.length > 0 || hasStartedWelcomeRef.current || hasSentWelcomeRef.current) {
+        console.log('[Welcome] Skipping welcome message - conditions not met:', {
+          noUserId: !user?.id,
+          hasMessages: messages.length > 0,
+          alreadyStarted: hasStartedWelcomeRef.current,
+          alreadySent: hasSentWelcomeRef.current
+        });
+        return;
+      }
+
+      try {
+        console.log('[Welcome] Starting welcome message process for user:', user.id);
+        hasStartedWelcomeRef.current = true;
+        
+        // Fetch user profile to check if new user
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('has_seen_welcome')
+          .eq('id', user.id)
+          .single();
+
+        if (profileError) {
+          console.error('[Welcome] Profile fetch error:', profileError);
+          return;
+        }
+
+        const isNewUser = profileData && !profileData.has_seen_welcome;
+        console.log('[Welcome] User profile check:', { isNewUser });
+        
+        // Fetch reminders and goals
+        const [remindersResponse, goalsResponse] = await Promise.all([
+          supabase.from('user_reminders').select('reminders').eq('user_id', user.id),
+          supabase.from('goals').select('*').eq('user_id', user.id)
+        ]);
+
+        if (remindersResponse.error || goalsResponse.error) {
+          console.error('[Welcome] Error fetching data:', {
+            remindersError: remindersResponse.error,
+            goalsError: goalsResponse.error
+          });
+          return;
+        }
+
+        if (mounted && !hasSentWelcomeRef.current) {
+          console.log('[Welcome] All conditions met, sending welcome message');
+          await sendWelcomeMessage(
+            user.id,
+            isNewUser,
+            remindersResponse.data?.[0]?.reminders || '',
+            goalsResponse.data || []
+          );
+        }
+      } catch (error) {
+        console.error('[Welcome] Error in welcome message process:', error);
+        if (mounted) {
+          setError('Failed to send welcome message. Please try again.');
+        }
+      }
+    };
+
+    sendInitialWelcomeMessage();
+  }, [user?.id]);
 
   // Add useEffect to set user and fetch data
   useEffect(() => {
+    let mounted = true;
+
     const checkUser = async () => {
       try {
         console.log('Checking user session...');
@@ -190,37 +250,36 @@ function Chat({ activities, onActivityAdded }) {
         }
         
         console.log('Session check result:', session ? 'Session found' : 'No session');
-        if (session?.user) {
+        if (session?.user && mounted) {
           console.log('Setting user:', session.user);
           setUser(session.user);
-          await initializeUserData();
         }
       } catch (error) {
         console.error('Error checking user:', error);
-        setError('Failed to load user data. Please try again.');
+        if (mounted) {
+          setError('Failed to load user data. Please try again.');
+        }
       }
     };
 
     checkUser();
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('Auth state changed:', event, session?.user);
-      if (session?.user) {
-        console.log('Setting user from auth change:', session.user);
+      if (session?.user && mounted) {
         setUser(session.user);
-        // Only fetch data on sign_in event to prevent duplicate welcome messages
-        if (event === 'SIGNED_IN') {
-          await initializeUserData();
-        }
-      } else {
+      } else if (mounted) {
         setUser(null);
         setMessages([]);
       }
     });
 
-    return () => subscription.unsubscribe();
-  }, [initializeUserData]);
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
