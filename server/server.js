@@ -39,9 +39,9 @@ app.use((err, req, res, next) => {
 });
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/healthbuddy')
-  .then(() => console.log('Connected to MongoDB'))
-  .catch(err => console.error('MongoDB connection error:', err));
+// mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/healthbuddy')
+//   .then(() => console.log('Connected to MongoDB'))
+//   .catch(err => console.error('MongoDB connection error:', err));
 
 // OpenAI Configuration
 const openai = new OpenAI({
