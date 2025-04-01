@@ -428,7 +428,10 @@ function Chat({ activities, onActivityAdded }) {
       <Box sx={{ 
         display: 'flex', 
         flexDirection: 'column',
-        height: 'calc(100vh - 120px)', // viewport height minus navbar and padding
+        height: { 
+          xs: 'calc(100vh - 140px)', // Account for taller navbar on mobile
+          sm: 'calc(100vh - 120px)'  // Desktop height
+        },
         bgcolor: 'background.default',
         borderRadius: 2,
         overflow: 'hidden'

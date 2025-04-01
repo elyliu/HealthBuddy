@@ -29,11 +29,11 @@ function Navbar({ currentView, onViewChange }) {
         background: 'linear-gradient(135deg, #FFB800 0%, #FFA000 100%)',
         borderBottom: '1px solid',
         borderColor: 'divider',
-        height: '80px'
+        height: { xs: '100px', sm: '80px' }
       }}
     >
       <Toolbar sx={{ 
-          minHeight: '80px !important',
+          minHeight: { xs: '100px !important', sm: '80px !important' },
           px: 2,
           display: 'flex',
           alignItems: 'center',
@@ -44,7 +44,7 @@ function Navbar({ currentView, onViewChange }) {
           src="/healthbuddy-logo.png"
           alt="HealthBuddy"
           sx={{ 
-            height: { xs: 35, sm: 100 },
+            height: { xs: 50, sm: 100 },
             width: 'auto',
             mr: 1,
             cursor: 'pointer',

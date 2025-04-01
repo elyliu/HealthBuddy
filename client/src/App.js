@@ -256,7 +256,8 @@ function App() {
           <Box 
             component="main" 
             sx={{ 
-              paddingTop: '80px'
+              paddingTop: { xs: '120px', sm: '80px' }, // More padding on mobile
+              paddingBottom: { xs: '20px', sm: '20px' }
             }}
           >
             {renderContent()}
