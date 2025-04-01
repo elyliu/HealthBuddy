@@ -422,16 +422,14 @@ function Chat({ activities, onActivityAdded }) {
     <Container 
       maxWidth="md" 
       sx={{ 
-        p: { xs: 2, sm: 3 }
+        p: { xs: 2, sm: 3 },
+        height: '100%'
       }}
     >
       <Box sx={{ 
         display: 'flex', 
         flexDirection: 'column',
-        height: { 
-          xs: 'calc(100vh - 140px)', // Account for taller navbar on mobile
-          sm: 'calc(100vh - 120px)'  // Desktop height
-        },
+        height: '100%',
         bgcolor: 'background.default',
         borderRadius: 2,
         overflow: 'hidden'

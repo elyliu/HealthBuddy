@@ -3,7 +3,9 @@ import {
   AppBar,
   Toolbar,
   Box,
-  IconButton
+  IconButton,
+  useTheme,
+  useMediaQuery
 } from '@mui/material';
 import {
   Chat as ChatIcon,
@@ -13,6 +15,8 @@ import {
 } from '@mui/icons-material';
 
 function Navbar({ currentView, onViewChange }) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const navItems = [
     { label: 'Chat', icon: <ChatIcon />, value: 'chat' },
@@ -29,22 +33,28 @@ function Navbar({ currentView, onViewChange }) {
         background: 'linear-gradient(135deg, #FFB800 0%, #FFA000 100%)',
         borderBottom: '1px solid',
         borderColor: 'divider',
-        height: { xs: '100px', sm: '80px' }
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: theme.zIndex.appBar
       }}
     >
-      <Toolbar sx={{ 
-          minHeight: { xs: '100px !important', sm: '80px !important' },
+      <Toolbar 
+        disableGutters
+        sx={{ 
+          minHeight: { xs: '80px !important', sm: '80px !important' },
           px: 2,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between'
-        }}>
+        }}
+      >
         <Box 
           component="img"
           src="/healthbuddy-logo.png"
           alt="HealthBuddy"
           sx={{ 
-            height: { xs: 50, sm: 100 },
+            height: { xs: 40, sm: 80 },
             width: 'auto',
             mr: 1,
             cursor: 'pointer',
@@ -54,7 +64,6 @@ function Navbar({ currentView, onViewChange }) {
           }}
           onClick={() => onViewChange('chat')}
         />
-        <Box sx={{ flexGrow: 1 }} />
         <Box sx={{ display: 'flex', gap: 1 }}>
           {navItems.map((item) => (
             <IconButton

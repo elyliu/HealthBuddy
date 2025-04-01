@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { ThemeProvider, createTheme, useTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { Box } from '@mui/material';
+import { Box, useMediaQuery } from '@mui/material';
 import Navbar from './components/Navbar';
 import Chat from './components/Chat';
 import Profile from './components/Profile';
@@ -248,16 +248,24 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <Box sx={{ 
-          minHeight: '100vh',
-          bgcolor: 'background.default'
-        }}>
+        <Box 
+          component="div" 
+          sx={{ 
+            display: 'flex',
+            flexDirection: 'column',
+            minHeight: '100vh',
+            width: '100%',
+            position: 'relative'
+          }}
+        >
           <Navbar currentView={currentView} onViewChange={setCurrentView} />
-          <Box 
-            component="main" 
-            sx={{ 
-              paddingTop: { xs: '120px', sm: '80px' }, // More padding on mobile
-              paddingBottom: { xs: '20px', sm: '20px' }
+          <Box
+            component="main"
+            sx={{
+              width: '100%',
+              position: 'relative',
+              mt: '80px', // Fixed margin for navbar
+              flexGrow: 1
             }}
           >
             {renderContent()}
