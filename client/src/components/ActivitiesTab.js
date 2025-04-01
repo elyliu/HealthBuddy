@@ -33,13 +33,13 @@ function ActivitiesTab({ activities, onActivityAdded }) {
     <Container 
       maxWidth="md" 
       sx={{ 
-        height: 'calc(100vh - 88px)',
+        height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        pt: 1,
-        pb: 1,
-        px: 1,
-        mt: '76px'
+        pt: 0,
+        pb: 2,
+        px: { xs: 0, sm: 2 },
+        position: 'relative'
       }}
     >
       <Box sx={{ 
@@ -49,7 +49,8 @@ function ActivitiesTab({ activities, onActivityAdded }) {
         bgcolor: 'background.default',
         borderRadius: 2,
         position: 'relative',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        height: '100%'
       }}>
         <Box sx={{ position: 'absolute', top: 16, right: 16, zIndex: 1001 }}>
           <Fab

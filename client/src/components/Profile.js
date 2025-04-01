@@ -332,8 +332,28 @@ function Profile() {
 
   if (isAuthenticated) {
     return (
-      <Container maxWidth="sm" sx={{ mt: 4 }}>
-        <Paper elevation={3} sx={{ p: 4 }}>
+      <Container 
+        maxWidth="md" 
+        sx={{ 
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          pt: 0,
+          pb: 2,
+          px: { xs: 0, sm: 2 },
+          position: 'relative'
+        }}
+      >
+        <Box sx={{ 
+          flex: 1,
+          display: 'flex', 
+          flexDirection: 'column',
+          bgcolor: 'background.default',
+          borderRadius: 2,
+          position: 'relative',
+          overflow: 'hidden',
+          height: '100%'
+        }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3 }}>
             <Typography variant="h5" gutterBottom>
               {user?.user_metadata?.name || 'User'}
@@ -405,7 +425,7 @@ function Profile() {
           >
             Sign Out
           </Button>
-        </Paper>
+        </Box>
 
         <Dialog open={openGoalDialog} onClose={handleCloseGoalDialog}>
           <DialogTitle>{editingGoal ? 'Edit Goal' : 'Add New Goal'}</DialogTitle>
@@ -456,23 +476,37 @@ function Profile() {
   }
 
   return (
-    <Container maxWidth="sm" sx={{ mt: 4 }}>
-      <Paper elevation={3} sx={{ p: 4 }}>
+    <Container 
+      maxWidth="md" 
+      sx={{ 
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        pt: 0,
+        pb: 2,
+        px: { xs: 0, sm: 2 },
+        position: 'relative'
+      }}
+    >
+      <Box sx={{ 
+        flex: 1,
+        display: 'flex', 
+        flexDirection: 'column',
+        bgcolor: 'background.default',
+        borderRadius: 2,
+        position: 'relative',
+        overflow: 'hidden',
+        height: '100%'
+      }}>
+        {error && (
+          <Alert severity="error" sx={{ m: 2 }}>{error}</Alert>
+        )}
+        {success && (
+          <Alert severity="success" sx={{ m: 2 }}>{success}</Alert>
+        )}
         <Typography variant="h5" gutterBottom align="center">
           {isSignUp ? 'Create Account' : 'Sign In'}
         </Typography>
-
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
-
-        {success && (
-          <Alert severity="success" sx={{ mb: 2 }}>
-            {success}
-          </Alert>
-        )}
 
         <form onSubmit={handleAuth}>
           {isSignUp && (
@@ -533,7 +567,7 @@ function Profile() {
               : "Don't have an account? Sign Up"}
           </Button>
         </form>
-      </Paper>
+      </Box>
     </Container>
   );
 }
