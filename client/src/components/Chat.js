@@ -422,20 +422,16 @@ function Chat({ activities, onActivityAdded }) {
     <Container 
       maxWidth="md" 
       sx={{ 
-        display: 'flex',
-        flexDirection: 'column',
-        flex: 1,
         p: { xs: 2, sm: 3 }
       }}
     >
       <Box sx={{ 
-        flex: 1,
         display: 'flex', 
         flexDirection: 'column',
+        height: 'calc(100vh - 120px)', // viewport height minus navbar and padding
         bgcolor: 'background.default',
         borderRadius: 2,
-        overflow: 'hidden',
-        position: 'relative'
+        overflow: 'hidden'
       }}>
         {error && (
           <Alert severity="error" sx={{ m: 2, borderRadius: 2 }}>
@@ -449,9 +445,7 @@ function Chat({ activities, onActivityAdded }) {
             overflow: 'auto',
             px: 2,
             py: 1,
-            bgcolor: alpha(theme.palette.primary.main, 0.03),
-            WebkitOverflowScrolling: 'touch', // For smooth scrolling on iOS
-            maxHeight: 'calc(100vh - 180px)' // Account for navbar and input box
+            bgcolor: alpha(theme.palette.primary.main, 0.03)
           }}
         >
           {messages.map((message, index) => (

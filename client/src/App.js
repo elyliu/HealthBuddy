@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -158,6 +158,21 @@ function App() {
   const [currentView, setCurrentView] = useState('chat');
   const [activities, setActivities] = useState([]);
   const [user, setUser] = useState(null);
+  const [navHeight, setNavHeight] = useState(0);
+  const navRef = useRef(null);
+
+  useEffect(() => {
+    const updateNavHeight = () => {
+      if (navRef.current) {
+        const height = navRef.current.offsetHeight;
+        setNavHeight(height);
+      }
+    };
+
+    updateNavHeight();
+    window.addEventListener('resize', updateNavHeight);
+    return () => window.removeEventListener('resize', updateNavHeight);
+  }, []);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -234,8 +249,6 @@ function App() {
       <CssBaseline />
       <Router>
         <Box sx={{ 
-          display: 'flex',
-          flexDirection: 'column',
           minHeight: '100vh',
           bgcolor: 'background.default'
         }}>
@@ -243,10 +256,7 @@ function App() {
           <Box 
             component="main" 
             sx={{ 
-              flexGrow: 1,
-              width: '100%',
-              paddingTop: { xs: '100px', sm: '100px' }, // Increase padding to ensure content starts below navbar
-              paddingBottom: { xs: '20px', sm: '20px' }
+              paddingTop: '80px'
             }}
           >
             {renderContent()}

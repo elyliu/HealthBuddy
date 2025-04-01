@@ -29,12 +29,11 @@ function Navbar({ currentView, onViewChange }) {
         background: 'linear-gradient(135deg, #FFB800 0%, #FFA000 100%)',
         borderBottom: '1px solid',
         borderColor: 'divider',
-        zIndex: 1100,
-        minHeight: { xs: '80px', sm: '80px' }
+        height: '80px'
       }}
     >
       <Toolbar sx={{ 
-          minHeight: { xs: '80px !important', sm: '80px !important' },
+          minHeight: '80px !important',
           px: 2,
           display: 'flex',
           alignItems: 'center',
