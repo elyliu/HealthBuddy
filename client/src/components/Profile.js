@@ -338,7 +338,7 @@ function Profile() {
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          pt: 0,
+          mt: { xs: '80px', sm: '80px' },
           pb: 2,
           px: { xs: 0, sm: 2 },
           position: 'relative'

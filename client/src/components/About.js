@@ -22,6 +22,7 @@ function About() {
         flexDirection: 'column',
         flex: 1,
         height: '100%',
+        mt: { xs: '80px', sm: '80px' },
         p: { xs: 1, sm: 2 }
       }}
     >
