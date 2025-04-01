@@ -234,14 +234,27 @@ function App() {
       <CssBaseline />
       <Router>
         <Box sx={{ 
-          minHeight: '100vh', 
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: '100vh',
           bgcolor: 'background.default',
-          pt: { xs: '80px', sm: '80px' }, // Add padding top to account for navbar
-          pb: { xs: '60px', sm: '60px' }, // Add padding bottom for mobile
-          px: { xs: 2, sm: 3 } // Add horizontal padding
+          pt: { xs: '90px', sm: '100px' }, // Increased padding top
+          pb: { xs: '70px', sm: '80px' }, // Increased padding bottom
+          px: { xs: 2, sm: 3 }, // Horizontal padding
+          position: 'relative',
+          overflow: 'auto'
         }}>
           <Navbar currentView={currentView} onViewChange={setCurrentView} />
-          {renderContent()}
+          <Box component="main" sx={{ 
+            flexGrow: 1,
+            width: '100%',
+            maxWidth: '800px',
+            mx: 'auto',
+            position: 'relative',
+            zIndex: 1
+          }}>
+            {renderContent()}
+          </Box>
         </Box>
       </Router>
     </ThemeProvider>

@@ -29,22 +29,26 @@ function Navbar({ currentView, onViewChange }) {
         background: 'linear-gradient(135deg, #FFB800 0%, #FFA000 100%)',
         borderBottom: '1px solid',
         borderColor: 'divider',
-        zIndex: (theme) => theme.zIndex.drawer + 1
+        zIndex: (theme) => theme.zIndex.drawer + 2,
+        top: 0,
+        left: 0,
+        right: 0
       }}
     >
       <Toolbar sx={{ 
           p: 0,
           pl: { xs: 2, sm: 2 },
-          minHeight: { xs: '60px !important', sm: '80px !important' },
+          minHeight: { xs: '70px !important', sm: '80px !important' },
           display: 'flex',
-          alignItems: 'center'
+          alignItems: 'center',
+          justifyContent: 'space-between'
         }}>
         <Box 
           component="img"
           src="/healthbuddy-logo.png"
           alt="HealthBuddy"
           sx={{ 
-            height: { xs: 40, sm: 100 },
+            height: { xs: 35, sm: 100 },
             width: 'auto',
             mr: 1,
             cursor: 'pointer',
