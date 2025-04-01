@@ -20,7 +20,8 @@ function About() {
       sx={{ 
         display: 'flex',
         flexDirection: 'column',
-        minHeight: 'calc(100vh - 70px)', // Full height minus navbar
+        flex: 1,
+        height: '100%',
         p: { xs: 1, sm: 2 }
       }}
     >
@@ -30,7 +31,8 @@ function About() {
         flexDirection: 'column',
         bgcolor: 'background.default',
         borderRadius: 2,
-        overflow: 'hidden'
+        overflow: 'auto',
+        WebkitOverflowScrolling: 'touch' // For smooth scrolling on iOS
       }}>
         <Paper 
           elevation={0}

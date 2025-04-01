@@ -35,7 +35,8 @@ function ActivitiesTab({ activities, onActivityAdded }) {
       sx={{ 
         display: 'flex',
         flexDirection: 'column',
-        minHeight: 'calc(100vh - 70px)', // Full height minus navbar
+        flex: 1,
+        height: '100%',
         p: { xs: 1, sm: 2 }
       }}
     >
@@ -45,9 +46,10 @@ function ActivitiesTab({ activities, onActivityAdded }) {
         flexDirection: 'column',
         bgcolor: 'background.default',
         borderRadius: 2,
-        overflow: 'hidden'
+        overflow: 'hidden',
+        position: 'relative'
       }}>
-        <Box sx={{ position: 'absolute', top: 16, right: 16, zIndex: 1001 }}>
+        <Box sx={{ position: 'fixed', top: 85, right: 16, zIndex: 1001 }}>
           <Fab
             color="error"
             aria-label="add activity"

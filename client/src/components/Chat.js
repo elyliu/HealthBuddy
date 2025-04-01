@@ -424,7 +424,8 @@ function Chat({ activities, onActivityAdded }) {
       sx={{ 
         display: 'flex',
         flexDirection: 'column',
-        minHeight: 'calc(100vh - 70px)', // Full height minus navbar
+        flex: 1,
+        height: '100%',
         p: { xs: 1, sm: 2 }
       }}
     >
@@ -434,7 +435,8 @@ function Chat({ activities, onActivityAdded }) {
         flexDirection: 'column',
         bgcolor: 'background.default',
         borderRadius: 2,
-        overflow: 'hidden'
+        overflow: 'hidden',
+        position: 'relative'
       }}>
         {error && (
           <Alert severity="error" sx={{ m: 2, borderRadius: 2 }}>
@@ -443,13 +445,14 @@ function Chat({ activities, onActivityAdded }) {
         )}
 
         <List 
-          ref={messagesEndRef}
           sx={{ 
             flex: 1,
             overflow: 'auto',
             px: 2,
             py: 1,
-            bgcolor: alpha(theme.palette.primary.main, 0.03)
+            bgcolor: alpha(theme.palette.primary.main, 0.03),
+            WebkitOverflowScrolling: 'touch', // For smooth scrolling on iOS
+            maxHeight: 'calc(100vh - 180px)' // Account for navbar and input box
           }}
         >
           {messages.map((message, index) => (

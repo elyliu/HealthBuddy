@@ -237,7 +237,10 @@ function App() {
           display: 'flex',
           flexDirection: 'column',
           minHeight: '100vh',
-          bgcolor: 'background.default'
+          minHeight: '-webkit-fill-available', // Add iOS support
+          bgcolor: 'background.default',
+          position: 'relative',
+          pb: '70px' // Add bottom padding to prevent content from being cut off
         }}>
           <Navbar currentView={currentView} onViewChange={setCurrentView} />
           <Box 
@@ -245,10 +248,9 @@ function App() {
             sx={{ 
               flexGrow: 1,
               width: '100%',
-              marginTop: '70px', // Fixed margin for navbar height
-              overflowY: 'auto',
-              overflowX: 'hidden',
-              WebkitOverflowScrolling: 'touch' // For smooth scrolling on iOS
+              pt: '70px', // Change from marginTop to paddingTop
+              display: 'flex',
+              flexDirection: 'column'
             }}
           >
             {renderContent()}
