@@ -423,6 +423,7 @@ function Chat({ activities, onActivityAdded }) {
       maxWidth="md" 
       sx={{ 
         p: { xs: 2, sm: 3 },
+        pt: { xs: '100px', sm: '100px' },
         height: '100%'
       }}
     >
