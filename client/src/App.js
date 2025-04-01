@@ -237,10 +237,7 @@ function App() {
           display: 'flex',
           flexDirection: 'column',
           minHeight: '100vh',
-          minHeight: '-webkit-fill-available', // Add iOS support
-          bgcolor: 'background.default',
-          position: 'relative',
-          pb: '70px' // Add bottom padding to prevent content from being cut off
+          bgcolor: 'background.default'
         }}>
           <Navbar currentView={currentView} onViewChange={setCurrentView} />
           <Box 
@@ -248,9 +245,8 @@ function App() {
             sx={{ 
               flexGrow: 1,
               width: '100%',
-              pt: '70px', // Change from marginTop to paddingTop
-              display: 'flex',
-              flexDirection: 'column'
+              paddingTop: { xs: '100px', sm: '100px' }, // Increase padding to ensure content starts below navbar
+              paddingBottom: { xs: '20px', sm: '20px' }
             }}
           >
             {renderContent()}

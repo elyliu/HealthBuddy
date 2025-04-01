@@ -425,8 +425,7 @@ function Chat({ activities, onActivityAdded }) {
         display: 'flex',
         flexDirection: 'column',
         flex: 1,
-        height: '100%',
-        p: { xs: 1, sm: 2 }
+        p: { xs: 2, sm: 3 }
       }}
     >
       <Box sx={{ 
