@@ -29,16 +29,17 @@ function Navbar({ currentView, onViewChange }) {
         background: 'linear-gradient(135deg, #FFB800 0%, #FFA000 100%)',
         borderBottom: '1px solid',
         borderColor: 'divider',
-        zIndex: (theme) => theme.zIndex.drawer + 2,
+        height: '70px',
         top: 0,
         left: 0,
-        right: 0
+        right: 0,
+        zIndex: 1100
       }}
     >
       <Toolbar sx={{ 
-          p: 0,
-          pl: { xs: 2, sm: 2 },
-          minHeight: { xs: '70px !important', sm: '80px !important' },
+          height: '70px',
+          minHeight: '70px !important',
+          px: 2,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between'

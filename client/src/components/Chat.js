@@ -422,13 +422,10 @@ function Chat({ activities, onActivityAdded }) {
     <Container 
       maxWidth="md" 
       sx={{ 
-        height: 'calc(100vh - 88px)',
         display: 'flex',
         flexDirection: 'column',
-        pt: 1,
-        pb: 1,
-        px: 1,
-        mt: '76px'
+        minHeight: 'calc(100vh - 70px)', // Full height minus navbar
+        p: { xs: 1, sm: 2 }
       }}
     >
       <Box sx={{ 
@@ -437,7 +434,6 @@ function Chat({ activities, onActivityAdded }) {
         flexDirection: 'column',
         bgcolor: 'background.default',
         borderRadius: 2,
-        position: 'relative',
         overflow: 'hidden'
       }}>
         {error && (

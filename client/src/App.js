@@ -237,22 +237,20 @@ function App() {
           display: 'flex',
           flexDirection: 'column',
           minHeight: '100vh',
-          bgcolor: 'background.default',
-          pt: { xs: '90px', sm: '100px' }, // Increased padding top
-          pb: { xs: '70px', sm: '80px' }, // Increased padding bottom
-          px: { xs: 2, sm: 3 }, // Horizontal padding
-          position: 'relative',
-          overflow: 'auto'
+          bgcolor: 'background.default'
         }}>
           <Navbar currentView={currentView} onViewChange={setCurrentView} />
-          <Box component="main" sx={{ 
-            flexGrow: 1,
-            width: '100%',
-            maxWidth: '800px',
-            mx: 'auto',
-            position: 'relative',
-            zIndex: 1
-          }}>
+          <Box 
+            component="main" 
+            sx={{ 
+              flexGrow: 1,
+              width: '100%',
+              marginTop: '70px', // Fixed margin for navbar height
+              overflowY: 'auto',
+              overflowX: 'hidden',
+              WebkitOverflowScrolling: 'touch' // For smooth scrolling on iOS
+            }}
+          >
             {renderContent()}
           </Box>
         </Box>

@@ -18,13 +18,10 @@ function About() {
     <Container 
       maxWidth="md" 
       sx={{ 
-        height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        pt: 0,
-        pb: 2,
-        px: { xs: 0, sm: 2 },
-        position: 'relative'
+        minHeight: 'calc(100vh - 70px)', // Full height minus navbar
+        p: { xs: 1, sm: 2 }
       }}
     >
       <Box sx={{ 
@@ -33,10 +30,7 @@ function About() {
         flexDirection: 'column',
         bgcolor: 'background.default',
         borderRadius: 2,
-        position: 'relative',
-        overflow: 'auto',
-        height: '100%',
-        p: { xs: 2, sm: 3 }
+        overflow: 'hidden'
       }}>
         <Paper 
           elevation={0}
