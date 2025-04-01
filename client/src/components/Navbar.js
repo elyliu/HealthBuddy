@@ -90,4 +90,4 @@ function Navbar({ currentView, onViewChange }) {
   );
 }
 
-export default Navbar; 
+export default Navbar;

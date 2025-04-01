@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { ThemeProvider, createTheme, useTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -158,20 +158,18 @@ function App() {
   const [currentView, setCurrentView] = useState('chat');
   const [activities, setActivities] = useState([]);
   const [user, setUser] = useState(null);
-  const [navHeight, setNavHeight] = useState(0);
-  const navRef = useRef(null);
+  const [navHeight, setNavHeight] = useState(80); // Start with default height
 
   useEffect(() => {
-    const updateNavHeight = () => {
-      if (navRef.current) {
-        const height = navRef.current.offsetHeight;
-        setNavHeight(height);
-      }
+    const handleResize = () => {
+      const isMobile = window.innerWidth < 600; // match MUI's sm breakpoint
+      setNavHeight(isMobile ? 80 : 80); // Adjust these values as needed
     };
-
-    updateNavHeight();
-    window.addEventListener('resize', updateNavHeight);
-    return () => window.removeEventListener('resize', updateNavHeight);
+    
+    handleResize();
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   useEffect(() => {
@@ -214,13 +212,10 @@ function App() {
     }
   };
 
-  // New function to handle both local and server updates
   const handleActivityAdded = async (newActivity) => {
-    // Update locally first
     if (newActivity) {
       setActivities(prev => [newActivity, ...prev]);
     }
-    // Then fetch from server in background
     fetchActivities();
   };
 
@@ -264,8 +259,9 @@ function App() {
             sx={{
               width: '100%',
               position: 'relative',
-              mt: '80px', // Fixed margin for navbar
-              flexGrow: 1
+              pt: `${navHeight}px`, 
+              flexGrow: 1,
+              overflowX: 'hidden' 
             }}
           >
             {renderContent()}
