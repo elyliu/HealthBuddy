@@ -233,7 +233,13 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+        <Box sx={{ 
+          minHeight: '100vh', 
+          bgcolor: 'background.default',
+          pt: { xs: '80px', sm: '80px' }, // Add padding top to account for navbar
+          pb: { xs: '60px', sm: '60px' }, // Add padding bottom for mobile
+          px: { xs: 2, sm: 3 } // Add horizontal padding
+        }}>
           <Navbar currentView={currentView} onViewChange={setCurrentView} />
           {renderContent()}
         </Box>

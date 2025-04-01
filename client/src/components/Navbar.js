@@ -23,25 +23,28 @@ function Navbar({ currentView, onViewChange }) {
 
   return (
     <AppBar 
-      position="sticky" 
+      position="fixed" 
       elevation={0}
       sx={{ 
         background: 'linear-gradient(135deg, #FFB800 0%, #FFA000 100%)',
         borderBottom: '1px solid',
-        borderColor: 'divider'
+        borderColor: 'divider',
+        zIndex: (theme) => theme.zIndex.drawer + 1
       }}
     >
       <Toolbar sx={{ 
           p: 0,
           pl: { xs: 2, sm: 2 },
-          minHeight: '80px !important'
+          minHeight: { xs: '60px !important', sm: '80px !important' },
+          display: 'flex',
+          alignItems: 'center'
         }}>
         <Box 
           component="img"
           src="/healthbuddy-logo.png"
           alt="HealthBuddy"
           sx={{ 
-            height: 100,
+            height: { xs: 40, sm: 100 },
             width: 'auto',
             mr: 1,
             cursor: 'pointer',
