@@ -232,27 +232,6 @@ function App() {
     }
   }, [user]);
 
-  const renderContent = () => {
-    switch (currentView) {
-      case 'activities':
-        return <ActivitiesTab 
-          activities={activities} 
-          onActivityAdded={handleActivityAdded}
-          onActivityUpdate={handleActivityUpdate}
-        />;
-      case 'profile':
-        return <Profile />;
-      case 'about':
-        return <About />;
-      default:
-        return <Chat 
-          activities={activities} 
-          onActivityAdded={handleActivityAdded}
-          onActivityUpdate={handleActivityUpdate}
-        />;
-    }
-  };
-
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -262,23 +241,34 @@ function App() {
           sx={{ 
             display: 'flex',
             flexDirection: 'column',
-            minHeight: '100vh',
-            width: '100%',
-            position: 'relative'
+            height: '100vh',
+            overflow: 'hidden'
           }}
         >
           <Navbar currentView={currentView} onViewChange={setCurrentView} />
-          <Box
-            component="main"
-            sx={{
-              width: '100%',
-              position: 'relative',
-              pt: `${navHeight}px`, 
-              flexGrow: 1,
-              overflowX: 'hidden' 
-            }}
-          >
-            {renderContent()}
+          
+          <Box sx={{ display: currentView === 'activities' ? 'block' : 'none', flex: 1 }}>
+            <ActivitiesTab 
+              activities={activities} 
+              onActivityAdded={handleActivityAdded}
+              onActivityUpdate={handleActivityUpdate}
+            />
+          </Box>
+          
+          <Box sx={{ display: currentView === 'profile' ? 'block' : 'none', flex: 1 }}>
+            <Profile />
+          </Box>
+          
+          <Box sx={{ display: currentView === 'about' ? 'block' : 'none', flex: 1 }}>
+            <About />
+          </Box>
+          
+          <Box sx={{ display: currentView === 'chat' ? 'block' : 'none', flex: 1 }}>
+            <Chat 
+              activities={activities} 
+              onActivityAdded={handleActivityAdded}
+              onActivityUpdate={handleActivityUpdate}
+            />
           </Box>
         </Box>
       </Router>
