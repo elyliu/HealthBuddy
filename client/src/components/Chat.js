@@ -429,6 +429,10 @@ function Chat({ activities, onActivityAdded }) {
     setShowAddActivity(false);
   };
 
+  const handleActivityUpdate = (updatedActivities) => {
+    setActivities(updatedActivities);
+  };
+
   return (
     <Container 
       maxWidth="md" 
