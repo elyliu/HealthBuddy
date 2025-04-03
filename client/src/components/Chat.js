@@ -434,21 +434,18 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
   };
 
   return (
-    <Container 
-      maxWidth="md" 
-      sx={{ 
-        p: { xs: 2, sm: 3 },
-        mt: { xs: '80px', sm: '80px' },
-        height: '100%'
-      }}
-    >
+    <Container maxWidth="md" sx={{ 
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden'
+    }}>
       <Box sx={{ 
-        display: 'flex', 
+        flex: 1,
+        display: 'flex',
         flexDirection: 'column',
-        height: '100%',
-        bgcolor: 'background.default',
-        borderRadius: 2,
-        overflow: 'hidden'
+        overflow: 'hidden',
+        position: 'relative'
       }}>
         {error && (
           <Alert severity="error" sx={{ m: 2, borderRadius: 2 }}>
@@ -473,99 +470,78 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
                   mb: 0.5
                 }}
               >
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.25 }}>
+                <Box sx={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  maxWidth: '80%'
+                }}>
                   {message.sender !== 'You' && (
-                    <ListItemAvatar sx={{ minWidth: 52 }}>
+                    <ListItemAvatar>
                       <Avatar 
-                        sx={{ 
-                          width: 48, 
-                          height: 48,
-                          background: 'none'
-                        }}
-                        src="/healthbuddy_logo_round.png"
-                      />
+                        alt="HealthBuddy" 
+                        src="/healthbuddy-avatar.png"
+                        sx={{ bgcolor: 'primary.main', width: 40, height: 40 }}
+                      >
+                        HB
+                      </Avatar>
                     </ListItemAvatar>
                   )}
-                  <Typography variant="caption" color="text.secondary">
-                    {message.sender}
-                  </Typography>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 2,
+                      bgcolor: message.sender === 'You' ? 'primary.main' : 'background.paper',
+                      color: message.sender === 'You' ? 'primary.contrastText' : 'text.primary',
+                      borderRadius: 2,
+                      maxWidth: '100%'
+                    }}
+                  >
+                    <Typography variant="body1">
+                      {message.content}
+                    </Typography>
+                  </Paper>
                 </Box>
-                <Paper
-                  elevation={0}
-                  sx={{
-                    p: 1.25,
-                    maxWidth: '95%',
-                    ml: message.sender === 'You' ? 0 : '52px',
-                    background: message.sender === 'You' 
-                      ? 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)'
-                      : 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
-                    color: message.sender === 'You' ? 'white' : 'text.primary',
-                    borderRadius: 2,
-                    boxShadow: message.sender === 'You'
-                      ? '0 4px 20px rgba(33, 150, 243, 0.2)'
-                      : '0 4px 20px rgba(0, 0, 0, 0.05)',
-                    whiteSpace: 'pre-wrap',
-                    wordBreak: 'break-word',
-                    transition: 'transform 0.2s',
-                    '&:hover': {
-                      transform: 'translateY(-2px)'
-                    }
-                  }}
-                >
-                  <Typography variant="body1">
-                    {message.content}
-                  </Typography>
-                </Paper>
               </ListItem>
             ))}
 
             {isTyping && (
               <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', mb: 0.5 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.25 }}>
-                  <ListItemAvatar sx={{ minWidth: 52 }}>
+                <Box sx={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  maxWidth: '80%'
+                }}>
+                  <ListItemAvatar>
                     <Avatar 
-                      sx={{ 
-                        width: 48, 
-                        height: 48,
-                        background: 'none'
-                      }}
-                      src="/healthbuddy_logo_round.png"
-                    />
+                      alt="HealthBuddy" 
+                      src="/healthbuddy-avatar.png"
+                      sx={{ bgcolor: 'primary.main', width: 40, height: 40 }}
+                    >
+                      HB
+                    </Avatar>
                   </ListItemAvatar>
-                  <Typography variant="caption" color="text.secondary">
-                    HealthBuddy
-                  </Typography>
-                </Box>
-                <Paper
-                  elevation={0}
-                  sx={{
-                    p: 1.25,
-                    maxWidth: '95%',
-                    ml: '52px',
-                    background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
-                    borderRadius: 2,
-                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
-                    position: 'relative',
-                    minWidth: '100px'
-                  }}
-                >
-                  <Typography variant="body1">
-                    <Box
-                      component="span"
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 2,
+                      bgcolor: 'background.paper',
+                      borderRadius: 2,
+                      position: 'relative'
+                    }}
+                  >
+                    <Typography 
+                      variant="body1" 
                       sx={{
                         '&::after': {
                           content: '""',
-                          animation: `${loadingDots} 1.5s infinite`,
-                          display: 'inline-block',
-                          width: '1em',
-                          textAlign: 'left'
+                          animation: `${loadingDots} 1s infinite`,
                         }
                       }}
                     >
                       Typing
-                    </Box>
-                  </Typography>
-                </Paper>
+                    </Typography>
+                  </Paper>
+                </Box>
               </ListItem>
             )}
             <div ref={messagesEndRef} />
@@ -574,41 +550,47 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
 
         <Box sx={{ 
           p: 2, 
-          borderTop: 1, 
+          bgcolor: 'background.paper',
+          borderTop: 1,
           borderColor: 'divider',
-          bgcolor: 'background.paper'
+          position: 'sticky',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 1,
+          width: '100%'
         }}>
-          <Box sx={{ display: 'flex', gap: 1 }}>
+          <Box sx={{ 
+            display: 'flex',
+            gap: 1
+          }}>
             <TextField
               fullWidth
-              multiline
-              maxRows={4}
+              placeholder="Type a message..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Type a message..."
-              disabled={loading}
+              variant="outlined"
+              size="medium"
               sx={{
                 '& .MuiOutlinedInput-root': {
-                  borderRadius: 3
+                  borderRadius: 3,
+                  bgcolor: 'background.paper'
                 }
               }}
             />
             <IconButton 
+              color="primary" 
               onClick={handleSend}
-              disabled={!input.trim() || loading}
+              disabled={loading || !input.trim()}
               sx={{
-                alignSelf: 'flex-end',
-                background: theme.palette.primary.main,
-                color: 'white',
-                width: 48,
-                height: 48,
+                bgcolor: 'primary.main',
+                color: 'primary.contrastText',
                 '&:hover': {
-                  background: theme.palette.primary.dark
+                  bgcolor: 'primary.dark'
                 },
                 '&.Mui-disabled': {
-                  background: theme.palette.action.disabledBackground,
-                  color: theme.palette.action.disabled
+                  bgcolor: 'action.disabledBackground'
                 }
               }}
             >
@@ -616,18 +598,18 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
             </IconButton>
           </Box>
         </Box>
-
-        <AddActivityDialog
-          open={showAddActivity}
-          onClose={() => setShowAddActivity(false)}
-          onActivityAdded={handleActivityAdded}
-        />
-
-        <WelcomeModal
-          open={showWelcomeModal}
-          onClose={handleWelcomeModalClose}
-        />
       </Box>
+
+      <AddActivityDialog
+        open={showAddActivity}
+        onClose={() => setShowAddActivity(false)}
+        onActivityAdded={handleActivityAdded}
+      />
+
+      <WelcomeModal
+        open={showWelcomeModal}
+        onClose={handleWelcomeModalClose}
+      />
     </Container>
   );
 }
