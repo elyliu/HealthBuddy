@@ -255,7 +255,8 @@ function App() {
             position: 'relative',
             flex: 1,
             overflow: 'hidden',
-            width: '100%'
+            width: '100%',
+            mt: { xs: '80px', sm: '80px' } // Add margin-top to account for navbar
           }}>
             <Box sx={{ 
               position: 'absolute',
@@ -263,7 +264,8 @@ function App() {
               left: 0,
               right: 0,
               bottom: 0,
-              display: currentView === 'activities' ? 'block' : 'none'
+              display: currentView === 'activities' ? 'block' : 'none',
+              height: '100%'
             }}>
               <ActivitiesTab 
                 activities={activities} 
@@ -278,7 +280,8 @@ function App() {
               left: 0,
               right: 0,
               bottom: 0,
-              display: currentView === 'profile' ? 'block' : 'none'
+              display: currentView === 'profile' ? 'block' : 'none',
+              height: '100%'
             }}>
               <Profile />
             </Box>
@@ -289,7 +292,8 @@ function App() {
               left: 0,
               right: 0,
               bottom: 0,
-              display: currentView === 'about' ? 'block' : 'none'
+              display: currentView === 'about' ? 'block' : 'none',
+              height: '100%'
             }}>
               <About />
             </Box>
@@ -300,7 +304,8 @@ function App() {
               left: 0,
               right: 0,
               bottom: 0,
-              display: currentView === 'chat' ? 'block' : 'none'
+              display: currentView === 'chat' ? 'block' : 'none',
+              height: '100%'
             }}>
               <Chat 
                 activities={activities} 
