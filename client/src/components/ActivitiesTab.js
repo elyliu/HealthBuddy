@@ -3,9 +3,6 @@ import {
   Container,
   Box,
   Typography,
-  List,
-  ListItem,
-  Paper,
   Fab,
   Alert
 } from '@mui/material';
@@ -13,8 +10,9 @@ import {
   Add as AddIcon
 } from '@mui/icons-material';
 import AddActivityDialog from './AddActivityDialog';
+import ActivityList from './ActivityList';
 
-function ActivitiesTab({ activities, onActivityAdded }) {
+function ActivitiesTab({ activities, onActivityAdded, onActivityUpdate }) {
   const [showAddActivity, setShowAddActivity] = useState(false);
   const [error] = useState(null);
 
@@ -74,36 +72,12 @@ function ActivitiesTab({ activities, onActivityAdded }) {
           </Alert>
         )}
 
-        <List sx={{ flex: 1, overflow: 'auto', p: 2 }}>
-          {activities.map((activity, index) => (
-            <ListItem 
-              key={activity.id || index}
-              sx={{ px: 0, py: 1 }}
-            >
-              <Paper
-                elevation={0}
-                sx={{
-                  p: 2,
-                  width: '100%',
-                  borderRadius: 2,
-                  background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
-                  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
-                  transition: 'transform 0.2s',
-                  '&:hover': {
-                    transform: 'translateY(-2px)'
-                  }
-                }}
-              >
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  {activity.description}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {new Date(activity.date).toLocaleDateString()}
-                </Typography>
-              </Paper>
-            </ListItem>
-          ))}
-        </List>
+        <Box sx={{ flex: 1, overflow: 'auto', p: 2 }}>
+          <Typography variant="h5" sx={{ mb: 2, color: 'text.primary' }}>
+            Your Activities
+          </Typography>
+          <ActivityList activities={activities} onUpdate={onActivityUpdate} />
+        </Box>
 
         <AddActivityDialog
           open={showAddActivity}

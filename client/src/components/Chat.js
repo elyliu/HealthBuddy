@@ -34,7 +34,7 @@ const loadingDots = keyframes`
   80%, 100% { content: ''; }
 `;
 
-function Chat({ activities, onActivityAdded }) {
+function Chat({ activities, onActivityAdded, onActivityUpdate }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -430,7 +430,7 @@ function Chat({ activities, onActivityAdded }) {
   };
 
   const handleActivityUpdate = (updatedActivities) => {
-    setActivities(updatedActivities);
+    onActivityUpdate(updatedActivities);
   };
 
   return (
@@ -456,26 +456,72 @@ function Chat({ activities, onActivityAdded }) {
           </Alert>
         )}
 
-        <List 
-          sx={{ 
-            flex: 1,
-            overflow: 'auto',
-            px: 2,
-            py: 1,
-            bgcolor: alpha(theme.palette.primary.main, 0.03)
-          }}
-        >
-          {messages.map((message, index) => (
-            <ListItem 
-              key={index} 
-              sx={{ 
-                flexDirection: 'column',
-                alignItems: message.sender === 'You' ? 'flex-end' : 'flex-start',
-                mb: 0.5
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.25 }}>
-                {message.sender !== 'You' && (
+        <Box sx={{ 
+          flex: 1,
+          overflow: 'auto',
+          px: 2,
+          py: 1,
+          bgcolor: alpha(theme.palette.primary.main, 0.03)
+        }}>
+          <List>
+            {messages.map((message, index) => (
+              <ListItem 
+                key={index} 
+                sx={{ 
+                  flexDirection: 'column',
+                  alignItems: message.sender === 'You' ? 'flex-end' : 'flex-start',
+                  mb: 0.5
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.25 }}>
+                  {message.sender !== 'You' && (
+                    <ListItemAvatar sx={{ minWidth: 52 }}>
+                      <Avatar 
+                        sx={{ 
+                          width: 48, 
+                          height: 48,
+                          background: 'none'
+                        }}
+                        src="/healthbuddy_logo_round.png"
+                      />
+                    </ListItemAvatar>
+                  )}
+                  <Typography variant="caption" color="text.secondary">
+                    {message.sender}
+                  </Typography>
+                </Box>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 1.25,
+                    maxWidth: '95%',
+                    ml: message.sender === 'You' ? 0 : '52px',
+                    background: message.sender === 'You' 
+                      ? 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)'
+                      : 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
+                    color: message.sender === 'You' ? 'white' : 'text.primary',
+                    borderRadius: 2,
+                    boxShadow: message.sender === 'You'
+                      ? '0 4px 20px rgba(33, 150, 243, 0.2)'
+                      : '0 4px 20px rgba(0, 0, 0, 0.05)',
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
+                    transition: 'transform 0.2s',
+                    '&:hover': {
+                      transform: 'translateY(-2px)'
+                    }
+                  }}
+                >
+                  <Typography variant="body1">
+                    {message.content}
+                  </Typography>
+                </Paper>
+              </ListItem>
+            ))}
+
+            {isTyping && (
+              <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', mb: 0.5 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.25 }}>
                   <ListItemAvatar sx={{ minWidth: 52 }}>
                     <Avatar 
                       sx={{ 
@@ -486,91 +532,45 @@ function Chat({ activities, onActivityAdded }) {
                       src="/healthbuddy_logo_round.png"
                     />
                   </ListItemAvatar>
-                )}
-                <Typography variant="caption" color="text.secondary">
-                  {message.sender}
-                </Typography>
-              </Box>
-              <Paper
-                elevation={0}
-                sx={{
-                  p: 1.25,
-                  maxWidth: '95%',
-                  ml: message.sender === 'You' ? 0 : '52px',
-                  background: message.sender === 'You' 
-                    ? 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)'
-                    : 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
-                  color: message.sender === 'You' ? 'white' : 'text.primary',
-                  borderRadius: 2,
-                  boxShadow: message.sender === 'You'
-                    ? '0 4px 20px rgba(33, 150, 243, 0.2)'
-                    : '0 4px 20px rgba(0, 0, 0, 0.05)',
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-word',
-                  transition: 'transform 0.2s',
-                  '&:hover': {
-                    transform: 'translateY(-2px)'
-                  }
-                }}
-              >
-                <Typography variant="body1">
-                  {message.content}
-                </Typography>
-              </Paper>
-            </ListItem>
-          ))}
-
-          {isTyping && (
-            <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', mb: 0.5 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.25 }}>
-                <ListItemAvatar sx={{ minWidth: 52 }}>
-                  <Avatar 
-                    sx={{ 
-                      width: 48, 
-                      height: 48,
-                      background: 'none'
-                    }}
-                    src="/healthbuddy_logo_round.png"
-                  />
-                </ListItemAvatar>
-                <Typography variant="caption" color="text.secondary">
-                  HealthBuddy
-                </Typography>
-              </Box>
-              <Paper
-                elevation={0}
-                sx={{
-                  p: 1.25,
-                  maxWidth: '95%',
-                  ml: '52px',
-                  background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
-                  borderRadius: 2,
-                  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
-                  position: 'relative',
-                  minWidth: '100px'
-                }}
-              >
-                <Typography variant="body1">
-                  <Box
-                    component="span"
-                    sx={{
-                      '&::after': {
-                        content: '""',
-                        animation: `${loadingDots} 1.5s infinite`,
-                        display: 'inline-block',
-                        width: '1em',
-                        textAlign: 'left'
-                      }
-                    }}
-                  >
-                    Typing
-                  </Box>
-                </Typography>
-              </Paper>
-            </ListItem>
-          )}
-          <div ref={messagesEndRef} />
-        </List>
+                  <Typography variant="caption" color="text.secondary">
+                    HealthBuddy
+                  </Typography>
+                </Box>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 1.25,
+                    maxWidth: '95%',
+                    ml: '52px',
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
+                    borderRadius: 2,
+                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
+                    position: 'relative',
+                    minWidth: '100px'
+                  }}
+                >
+                  <Typography variant="body1">
+                    <Box
+                      component="span"
+                      sx={{
+                        '&::after': {
+                          content: '""',
+                          animation: `${loadingDots} 1.5s infinite`,
+                          display: 'inline-block',
+                          width: '1em',
+                          textAlign: 'left'
+                        }
+                      }}
+                    >
+                      Typing
+                    </Box>
+                  </Typography>
+                </Paper>
+              </ListItem>
+            )}
+            <div ref={messagesEndRef} />
+          </List>
+        </Box>
 
         <Box sx={{ 
           p: 2, 

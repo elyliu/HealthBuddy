@@ -13,6 +13,7 @@ import {
   TextField
 } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { supabase } from '../lib/supabaseClient';
 
 const ActivityList = ({ activities, onUpdate }) => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -39,26 +40,75 @@ const ActivityList = ({ activities, onUpdate }) => {
 
   const handleEditSubmit = async () => {
     try {
-      const response = await fetch(`/api/activities/${editingActivity.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(editForm),
+      console.log('Updating activity:', {
+        id: editingActivity.id,
+        form: editForm
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to update activity');
+      // First get the current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) {
+        console.error('Error getting user:', userError);
+        throw new Error('Failed to get user information');
+      }
+      if (!user) {
+        throw new Error('No authenticated user found');
       }
 
-      const updatedActivity = await response.json();
+      console.log('Current user:', user.id);
+
+      // First verify the activity exists and belongs to the user
+      const { data: existingActivity, error: fetchError } = await supabase
+        .from('activities')
+        .select('*')
+        .eq('id', editingActivity.id)
+        .eq('user_id', user.id)
+        .single();
+
+      if (fetchError) {
+        console.error('Error fetching activity:', fetchError);
+        throw new Error(`Failed to verify activity: ${fetchError.message}`);
+      }
+      if (!existingActivity) {
+        throw new Error('Activity not found or you do not have permission to edit it');
+      }
+
+      // Format the date to include time and timezone
+      const updateDate = new Date(editForm.date);
+      updateDate.setHours(12, 0, 0, 0); // Set to noon to avoid timezone issues
+      const formattedDate = updateDate.toISOString();
+
+      // Perform the update
+      const { data, error: updateError } = await supabase
+        .from('activities')
+        .update({
+          description: editForm.description,
+          date: formattedDate
+        })
+        .eq('id', editingActivity.id)
+        .eq('user_id', user.id)
+        .select('*');
+
+      if (updateError) {
+        console.error('Supabase update error:', updateError);
+        throw new Error(`Failed to update activity: ${updateError.message}`);
+      }
+
+      if (!data || data.length === 0) {
+        throw new Error('No activity was updated');
+      }
+
       onUpdate(activities.map(activity => 
-        activity.id === updatedActivity.id ? updatedActivity : activity
+        activity.id === data[0].id ? data[0] : activity
       ));
       handleEditClose();
     } catch (error) {
-      console.error('Error updating activity:', error);
-      alert('Failed to update activity');
+      console.error('Error updating activity:', {
+        message: error.message,
+        error: error,
+        stack: error.stack
+      });
+      alert(error.message || 'Failed to update activity. Please try again.');
     }
   };
 
@@ -68,18 +118,30 @@ const ActivityList = ({ activities, onUpdate }) => {
     }
 
     try {
-      const response = await fetch(`/api/activities/${activityId}`, {
-        method: 'DELETE',
-      });
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) {
+        console.error('Error getting user:', userError);
+        throw new Error('Failed to get user information');
+      }
+      if (!user) {
+        throw new Error('No authenticated user found');
+      }
 
-      if (!response.ok) {
-        throw new Error('Failed to delete activity');
+      const { error: deleteError } = await supabase
+        .from('activities')
+        .delete()
+        .eq('id', activityId)
+        .eq('user_id', user.id);
+
+      if (deleteError) {
+        console.error('Error deleting activity:', deleteError);
+        throw new Error(`Failed to delete activity: ${deleteError.message}`);
       }
 
       onUpdate(activities.filter(activity => activity.id !== activityId));
     } catch (error) {
       console.error('Error deleting activity:', error);
-      alert('Failed to delete activity');
+      alert(error.message || 'Failed to delete activity. Please try again.');
     }
   };
 

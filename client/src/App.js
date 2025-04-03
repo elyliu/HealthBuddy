@@ -219,6 +219,12 @@ function App() {
     fetchActivities();
   };
 
+  const handleActivityUpdate = async (updatedActivities) => {
+    setActivities(updatedActivities);
+    // Refresh activities from the database to ensure consistency
+    await fetchActivities();
+  };
+
   useEffect(() => {
     if (user) {
       console.log('User changed, fetching activities');
@@ -229,13 +235,21 @@ function App() {
   const renderContent = () => {
     switch (currentView) {
       case 'activities':
-        return <ActivitiesTab activities={activities} onActivityAdded={handleActivityAdded} />;
+        return <ActivitiesTab 
+          activities={activities} 
+          onActivityAdded={handleActivityAdded}
+          onActivityUpdate={handleActivityUpdate}
+        />;
       case 'profile':
         return <Profile />;
       case 'about':
         return <About />;
       default:
-        return <Chat activities={activities} onActivityAdded={handleActivityAdded} />;
+        return <Chat 
+          activities={activities} 
+          onActivityAdded={handleActivityAdded}
+          onActivityUpdate={handleActivityUpdate}
+        />;
     }
   };
 
