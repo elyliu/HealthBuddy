@@ -242,33 +242,72 @@ function App() {
             display: 'flex',
             flexDirection: 'column',
             height: '100vh',
-            overflow: 'hidden'
+            width: '100vw',
+            overflow: 'hidden',
+            position: 'fixed',
+            top: 0,
+            left: 0
           }}
         >
           <Navbar currentView={currentView} onViewChange={setCurrentView} />
           
-          <Box sx={{ display: currentView === 'activities' ? 'block' : 'none', flex: 1 }}>
-            <ActivitiesTab 
-              activities={activities} 
-              onActivityAdded={handleActivityAdded}
-              onActivityUpdate={handleActivityUpdate}
-            />
-          </Box>
-          
-          <Box sx={{ display: currentView === 'profile' ? 'block' : 'none', flex: 1 }}>
-            <Profile />
-          </Box>
-          
-          <Box sx={{ display: currentView === 'about' ? 'block' : 'none', flex: 1 }}>
-            <About />
-          </Box>
-          
-          <Box sx={{ display: currentView === 'chat' ? 'block' : 'none', flex: 1 }}>
-            <Chat 
-              activities={activities} 
-              onActivityAdded={handleActivityAdded}
-              onActivityUpdate={handleActivityUpdate}
-            />
+          <Box sx={{ 
+            position: 'relative',
+            flex: 1,
+            overflow: 'hidden',
+            width: '100%'
+          }}>
+            <Box sx={{ 
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              display: currentView === 'activities' ? 'block' : 'none'
+            }}>
+              <ActivitiesTab 
+                activities={activities} 
+                onActivityAdded={handleActivityAdded}
+                onActivityUpdate={handleActivityUpdate}
+              />
+            </Box>
+            
+            <Box sx={{ 
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              display: currentView === 'profile' ? 'block' : 'none'
+            }}>
+              <Profile />
+            </Box>
+            
+            <Box sx={{ 
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              display: currentView === 'about' ? 'block' : 'none'
+            }}>
+              <About />
+            </Box>
+            
+            <Box sx={{ 
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              display: currentView === 'chat' ? 'block' : 'none'
+            }}>
+              <Chat 
+                activities={activities} 
+                onActivityAdded={handleActivityAdded}
+                onActivityUpdate={handleActivityUpdate}
+              />
+            </Box>
           </Box>
         </Box>
       </Router>
