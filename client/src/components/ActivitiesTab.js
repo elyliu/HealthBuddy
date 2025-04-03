@@ -4,7 +4,8 @@ import {
   Box,
   Typography,
   Fab,
-  Alert
+  Alert,
+  Paper
 } from '@mui/material';
 import {
   Add as AddIcon
@@ -48,34 +49,43 @@ function ActivitiesTab({ activities, onActivityAdded, onActivityUpdate }) {
         overflow: 'hidden',
         position: 'relative'
       }}>
-        <Box sx={{ position: 'relative', top: 85, right: 16, zIndex: 1001 }}>
-          <Fab
-            color="error"
-            aria-label="add activity"
-            onClick={() => setShowAddActivity(true)}
-            sx={{
-              background: 'linear-gradient(135deg, #FF4081 0%, #C2185B 100%)',
-              boxShadow: '0 4px 20px rgba(244, 67, 54, 0.3)',
-              '&:hover': {
-                background: 'linear-gradient(135deg, #FF4081 0%, #C2185B 100%)',
-                boxShadow: '0 6px 25px rgba(244, 67, 54, 0.4)'
-              }
-            }}
-          >
-            <AddIcon />
-          </Fab>
-        </Box>
-
         {error && (
           <Alert severity="error" sx={{ m: 2, borderRadius: 2 }}>
             {error}
           </Alert>
         )}
 
-        <Box sx={{ flex: 1, overflow: 'auto', p: 2 }}>
-          <Typography variant="h5" sx={{ mb: 2, color: 'text.primary' }}>
+        <Paper 
+          elevation={0} 
+          sx={{ 
+            p: 2, 
+            display: 'flex', 
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            bgcolor: 'background.paper',
+            borderRadius: '12px 12px 0 0'
+          }}
+        >
+          <Typography variant="h5" sx={{ color: 'text.primary' }}>
             Your Activities
           </Typography>
+          <Fab
+            color="primary"
+            aria-label="add activity"
+            onClick={() => setShowAddActivity(true)}
+            size="medium"
+            sx={{
+              boxShadow: '0 4px 20px rgba(255, 184, 0, 0.3)',
+              '&:hover': {
+                boxShadow: '0 6px 25px rgba(255, 184, 0, 0.4)'
+              }
+            }}
+          >
+            <AddIcon />
+          </Fab>
+        </Paper>
+
+        <Box sx={{ flex: 1, overflow: 'auto', p: 2 }}>
           <ActivityList activities={activities} onUpdate={onActivityUpdate} />
         </Box>
 
