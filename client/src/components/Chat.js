@@ -57,6 +57,17 @@ function Chat({ activities, onActivityAdded }) {
   const sendWelcomeMessage = useCallback(async (userId, isNewUser, reminders, goals) => {
     try {
       console.log('[Welcome] Starting sendWelcomeMessage for user:', userId);
+
+      const dayOfWeek = new Date().toLocaleDateString('en-US', { 
+        weekday: 'long',
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      });
+      const timeOfDay = new Date().toLocaleTimeString('en-US', { 
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: true,
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      });
       
       const requestBody = {
         message: isNewUser 
@@ -68,14 +79,12 @@ function Chat({ activities, onActivityAdded }) {
             description: activity.description,
             date: activity.date
           })),
-          thingsToKeepInMind: reminders,
-          goals: goals.map(goal => ({
-            description: goal.goal_text
-          }))
+          dayOfWeek: dayOfWeek,
+          timeOfDay: timeOfDay
         },
-        systemPrompt: `Your name is Ellie.  You are a supportive, positive, and energetic AI health buddy. Your role is to help users maintain and improve their long-term and sustainable healthy habits. 
-        Let's start with some brief small talk and celebrate any recent wins to motivate them.  Keep response to 2-3 sentences max.
-        Maybe ask questions at the end to encourage a dialogue or suggest activities to make small incremental progress toward their goals.
+        systemPrompt: `You are a supportive, positive, and energetic AI health buddy. 
+        Your role is to help users maintain and improve their long-term and sustainable healthy habits. You have access to their recent activities.
+        It's currently ${dayOfWeek} at ${timeOfDay}. Let's start with some brief small talk based on day of week and time of day and celebrate any recent wins to motivate them. Keep response to 2-3 sentences max.
         `
       };
 
@@ -340,7 +349,7 @@ function Chat({ activities, onActivityAdded }) {
             description: goal.goal_text
           }))
         },
-        systemPrompt: `Your name is Ellie.  You are a supportive, positive, and empathetic AI health buddy. Your role is to help users maintain and improve their long-term and sustainable healthy habits. Strive for consistency rather than quick fixes.
+        systemPrompt: `You are a supportive, positive, and empathetic AI health buddy. Your role is to help users maintain and improve their long-term and sustainable healthy habits. Strive for consistency rather than quick fixes.
         You have access to their recent activities, personal reminders, and goals. Use this information to provide personalized, relevant advice and encouragement. 
         Keep responses to 2-3 sentences maximum unless the user asks for more. Keep your responses friendly and focused on health and fitness goals—avoid jargon when possible. 
         If a user's question suggests they need medical attention, advise them to consult a qualified healthcare professional.  Maybe ask questions at the end to encourage a dialogue or suggest activities to make small incremental progress toward their goals.
