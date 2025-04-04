@@ -37,16 +37,24 @@ function Navbar({ currentView, onViewChange }) {
         left: 0,
         right: 0,
         zIndex: theme.zIndex.appBar,
-        height: '64px'
+        height: { xs: '80px', sm: '64px' } // Even taller on mobile
       }}
     >
-      <Toolbar sx={{ height: '100%', px: { xs: 2, sm: 3 } }}>
+      <Toolbar 
+        sx={{ 
+          height: '100%', 
+          px: { xs: 2, sm: 3 },
+          minHeight: { xs: '80px !important', sm: '64px !important' }, // Match AppBar height
+          display: 'flex',
+          alignItems: 'center'
+        }}
+      >
         <Box 
           component="img" 
           src="/healthbuddy-logo.png" 
           alt="HealthBuddy"
           sx={{
-            height: { xs: '50px', sm: '80px' }, // Increased mobile size to 50px
+            height: { xs: '70px', sm: '80px' }, // Much larger on mobile
             width: 'auto',
             cursor: 'pointer',
             '&:hover': {
