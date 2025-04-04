@@ -36,7 +36,8 @@ function Navbar({ currentView, onViewChange }) {
         top: 0,
         left: 0,
         right: 0,
-        zIndex: theme.zIndex.appBar
+        zIndex: theme.zIndex.appBar,
+        height: '64px'
       }}
     >
       <Toolbar 
@@ -46,7 +47,8 @@ function Navbar({ currentView, onViewChange }) {
           px: 2,
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between'
+          justifyContent: 'space-between',
+          height: '100%'
         }}
       >
         <Box 
