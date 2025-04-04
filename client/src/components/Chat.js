@@ -596,13 +596,18 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
               onClick={handleSend}
               disabled={loading || !input.trim()}
               sx={{
+                ml: 1,
+                width: '50px',
+                height: '50px',
+                borderRadius: 2,
                 bgcolor: 'primary.main',
                 color: 'primary.contrastText',
                 '&:hover': {
                   bgcolor: 'primary.dark'
                 },
                 '&.Mui-disabled': {
-                  bgcolor: 'action.disabledBackground'
+                  bgcolor: 'action.disabledBackground',
+                  color: 'action.disabled'
                 }
               }}
             >
