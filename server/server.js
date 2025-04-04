@@ -148,6 +148,7 @@ app.post('/api/chat', async (req, res) => {
           role: "system",
           content: formattedContext
         },
+        ...(req.body.messages || []), // Include previous conversation history
         {
           role: "user",
           content: message

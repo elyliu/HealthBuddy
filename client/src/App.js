@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
-import { ThemeProvider, createTheme, useTheme } from '@mui/material/styles';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { Box, useMediaQuery } from '@mui/material';
+import { Box } from '@mui/material';
 import Navbar from './components/Navbar';
 import Chat from './components/Chat';
 import Profile from './components/Profile';
@@ -158,19 +158,6 @@ function App() {
   const [currentView, setCurrentView] = useState('chat');
   const [activities, setActivities] = useState([]);
   const [user, setUser] = useState(null);
-  const [navHeight, setNavHeight] = useState(80); // Start with default height
-
-  useEffect(() => {
-    const handleResize = () => {
-      const isMobile = window.innerWidth < 600; // match MUI's sm breakpoint
-      setNavHeight(isMobile ? 80 : 80); // Adjust these values as needed
-    };
-    
-    handleResize();
-    
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -212,17 +199,14 @@ function App() {
     }
   };
 
+  // New function to handle both local and server updates
   const handleActivityAdded = async (newActivity) => {
+    // Update locally first
     if (newActivity) {
       setActivities(prev => [newActivity, ...prev]);
     }
+    // Then fetch from server in background
     fetchActivities();
-  };
-
-  const handleActivityUpdate = async (updatedActivities) => {
-    setActivities(updatedActivities);
-    // Refresh activities from the database to ensure consistency
-    await fetchActivities();
   };
 
   useEffect(() => {
@@ -232,94 +216,40 @@ function App() {
     }
   }, [user]);
 
+  const renderContent = () => {
+    switch (currentView) {
+      case 'activities':
+        return <ActivitiesTab activities={activities} onActivityAdded={handleActivityAdded} />;
+      case 'profile':
+        return <Profile />;
+      case 'about':
+        return <About />;
+      default:
+        return <Chat activities={activities} onActivityAdded={handleActivityAdded} />;
+    }
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <Box 
-          component="div" 
-          sx={{ 
-            display: 'flex',
-            flexDirection: 'column',
-            height: '100vh',
-            width: '100vw',
-            overflow: 'hidden',
-            position: 'fixed',
-            top: 0,
-            left: 0
-          }}
-        >
+        <Box sx={{ 
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: '100vh',
+          bgcolor: 'background.default'
+        }}>
           <Navbar currentView={currentView} onViewChange={setCurrentView} />
-          
-          <Box sx={{ 
-            position: 'relative',
-            flex: 1,
-            overflow: 'hidden',
-            width: '100%',
-            mt: '64px' // Add margin-top to account for navbar height
-          }}>
-            <Box sx={{ 
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              display: currentView === 'activities' ? 'block' : 'none',
-              height: '100%',
-              overflow: 'auto',
-              pt: 2 // Add some padding at the top
-            }}>
-              <ActivitiesTab 
-                activities={activities} 
-                onActivityAdded={handleActivityAdded}
-                onActivityUpdate={handleActivityUpdate}
-              />
-            </Box>
-            
-            <Box sx={{ 
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              display: currentView === 'profile' ? 'block' : 'none',
-              height: '100%',
-              overflow: 'auto',
-              pt: 2 // Add some padding at the top
-            }}>
-              <Profile />
-            </Box>
-            
-            <Box sx={{ 
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              display: currentView === 'about' ? 'block' : 'none',
-              height: '100%',
-              overflow: 'auto',
-              pt: 2 // Add some padding at the top
-            }}>
-              <About />
-            </Box>
-            
-            <Box sx={{ 
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              display: currentView === 'chat' ? 'block' : 'none',
-              height: '100%',
-              overflow: 'auto'
-            }}>
-              <Chat 
-                activities={activities} 
-                onActivityAdded={handleActivityAdded}
-                onActivityUpdate={handleActivityUpdate}
-              />
-            </Box>
+          <Box 
+            component="main" 
+            sx={{ 
+              flexGrow: 1,
+              width: '100%',
+              paddingTop: { xs: '100px', sm: '100px' }, // Increase padding to ensure content starts below navbar
+              paddingBottom: { xs: '20px', sm: '20px' }
+            }}
+          >
+            {renderContent()}
           </Box>
         </Box>
       </Router>

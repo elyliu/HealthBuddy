@@ -316,27 +316,35 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
   };
 
   const handleSend = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || loading) return;
 
     const userMessage = input.trim();
     setInput('');
     setLoading(true);
     setError(null);
-    setIsTyping(true);
+
+    // Add user message to chat
+    const newUserMessage = { content: userMessage, sender: 'You' };
+    setMessages(prev => [...prev, newUserMessage]);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setError('Please log in to continue');
-        return;
+      if (!user?.id) {
+        throw new Error('Please log in to continue');
       }
 
-      // Add user message to chat
-      setMessages(prev => [...prev, {
-        sender: 'You',
-        content: userMessage,
-        timestamp: new Date()
-      }]);
+      // Add user message to messages array first
+      const newMessages = [...messages, newUserMessage];
+      setMessages(newMessages);
+
+      // Prepare context from all messages including the current one
+      const contextMessages = newMessages
+        .filter(msg => !msg.content.includes("Hello! I'm your AI health coach"))
+        .map(msg => ({
+          role: msg.sender === 'You' ? 'user' : 'assistant',
+          content: msg.content
+        }));
+
+      console.log('Sending messages context:', contextMessages); // Add logging
 
       const requestBody = {
         message: userMessage,
@@ -351,63 +359,48 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
             description: goal.goal_text
           }))
         },
-        systemPrompt: `You are a supportive, positive, and empathetic AI health buddy. Your role is to help users maintain and improve their long-term and sustainable healthy habits. Strive for consistency rather than quick fixes.
-        You have access to their recent activities, personal reminders, and goals. Use this information to provide personalized, relevant advice and encouragement. 
-        Keep responses to 2-3 sentences maximum unless the user asks for more. Keep your responses friendly and focused on health and fitness goals—avoid jargon when possible. 
-        If a user's question suggests they need medical attention, advise them to consult a qualified healthcare professional.  Maybe ask questions at the end to encourage a dialogue or suggest activities to make small incremental progress toward their goals.
-        If the user starts describing what they did recently, remind them to add the activities in the Activities tab, but don't ask them to do it every time.
-        Things you want to encourage:
-        Small, incremental changes to avoid burnout or injury. Emphasizing that consistency is key—flex goals rather than skip them.
-        Encouraging any form of physical activity—not just formal workouts.
-        Including strength training where feasible.
-        Reducing sugar intake and increasing protein and fiber intake.`
+        messages: contextMessages,
+        systemPrompt: `You are HealthBuddy, a supportive and knowledgeable AI health coach. Your communication style is:
+          - Friendly and encouraging, but professional
+          - Focused on sustainable, long-term health habits
+          - Personalized to the user's goals and preferences
+          - Evidence-based while remaining accessible
+          - ALWAYS keep responses to 2-3 sentences maximum
+          - ALWAYS reference previous messages in the conversation when relevant
+          
+          User Context:
+          ${goals.length > 0 ? `Goals:\n${goals.map(g => `- ${g.goal_text}`).join('\n')}` : 'No goals set yet'}
+          ${thingsToKeepInMind ? `\nThings to keep in mind:\n${thingsToKeepInMind}` : ''}
+          ${activities.length > 0 ? `\nRecent activities:\n${activities.slice(0, 5).map(a => `- ${a.description} (${new Date(a.date).toLocaleDateString()})`).join('\n')}` : 'No recent activities'}
+          
+          Use this information to provide relevant, personalized guidance. Reference specific goals and activities when appropriate to make responses more personal and contextual. Remember to ALWAYS keep responses to 2-3 sentences maximum and maintain conversation context by referencing previous messages when relevant.`
       };
 
-      console.log('Sending chat request with context:', requestBody.context);
+      console.log('Full request body:', requestBody); // Add logging
 
       const response = await fetch(`${config.serverUrl}/api/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify(requestBody)
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to send message: ${response.status} ${errorText}`);
+        throw new Error('Failed to get response');
       }
 
       const data = await response.json();
-      if (!data.message) {
-        throw new Error('Invalid response from server');
-      }
+      
+      // Add AI response to chat
+      const newAIMessage = { content: data.message, sender: 'HealthBuddy' };
+      setMessages(prev => [...prev, newAIMessage]);
 
-      // Log the chat message to the database
-      const { error: insertError } = await supabase
-        .from('chat_messages')
-        .insert({
-          user_id: user.id,
-          user_message: userMessage,
-          bot_response: data.message
-        });
-
-      if (insertError) {
-        console.error('Error logging chat message:', insertError);
-        // Don't throw the error, just log it - we still want to show the message to the user
-      }
-
-      setMessages(prev => [...prev, {
-        sender: 'HealthBuddy',
-        content: data.message,
-        timestamp: new Date()
-      }]);
     } catch (error) {
-      console.error('Error sending message:', error);
-      setError(`Failed to send message: ${error.message}`);
+      console.error('Error in chat:', error);
+      setError('Failed to send message. Please try again.');
     } finally {
       setLoading(false);
-      setIsTyping(false);
     }
   };
 
