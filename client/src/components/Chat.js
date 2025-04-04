@@ -438,14 +438,20 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
       height: '100%',
       display: 'flex',
       flexDirection: 'column',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      position: 'fixed',
+      top: 64, // Height of navbar
+      left: 0,
+      right: 0,
+      bottom: 0
     }}>
       <Box sx={{ 
         flex: 1,
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
-        position: 'relative'
+        position: 'relative',
+        pb: '80px' // Add padding at bottom to account for input box height
       }}>
         {error && (
           <Alert severity="error" sx={{ m: 2, borderRadius: 2 }}>
@@ -553,16 +559,22 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
           bgcolor: 'background.paper',
           borderTop: 1,
           borderColor: 'divider',
-          position: 'sticky',
+          position: 'fixed',
           bottom: 0,
           left: 0,
           right: 0,
-          zIndex: 1,
-          width: '100%'
+          zIndex: 1000,
+          width: '100%',
+          height: '80px',
+          display: 'flex',
+          alignItems: 'center'
         }}>
           <Box sx={{ 
             display: 'flex',
-            gap: 1
+            gap: 1,
+            width: '100%',
+            maxWidth: 'md',
+            mx: 'auto'
           }}>
             <TextField
               fullWidth
