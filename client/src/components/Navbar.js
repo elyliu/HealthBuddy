@@ -46,7 +46,7 @@ function Navbar({ currentView, onViewChange }) {
           src="/healthbuddy-logo.png" 
           alt="HealthBuddy"
           sx={{
-            height: { xs: '40px', sm: '80px' }, // Much larger on desktop
+            height: { xs: '50px', sm: '80px' }, // Increased mobile size to 50px
             width: 'auto',
             cursor: 'pointer',
             '&:hover': {
