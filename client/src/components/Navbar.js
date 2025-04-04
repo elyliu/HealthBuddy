@@ -40,53 +40,41 @@ function Navbar({ currentView, onViewChange }) {
         height: '64px'
       }}
     >
-      <Toolbar 
-        disableGutters
-        sx={{ 
-          minHeight: { xs: '80px !important', sm: '80px !important' },
-          px: 2,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          height: '100%'
-        }}
-      >
+      <Toolbar sx={{ height: '100%', px: { xs: 2, sm: 3 } }}>
         <Box 
-          component="img"
-          src="/healthbuddy-logo.png"
+          component="img" 
+          src="/healthbuddy-logo.png" 
           alt="HealthBuddy"
-          sx={{ 
-            height: { xs: 40, sm: 80 },
+          sx={{
+            height: { xs: '40px', sm: '80px' }, // Much larger on desktop
             width: 'auto',
-            mr: 1,
             cursor: 'pointer',
             '&:hover': {
               opacity: 0.9
             }
           }}
-          onClick={() => onViewChange('chat')}
         />
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          {navItems.map((item) => (
-            <IconButton
-              key={item.value}
-              onClick={() => onViewChange(item.value)}
-              sx={{
-                color: '#000000',
-                textTransform: 'none',
-                fontWeight: currentView === item.value ? 'bold' : 'normal',
-                '&:hover': {
-                  background: 'rgba(0, 0, 0, 0.1)',
-                },
-                ...(currentView === item.value && {
-                  background: 'rgba(0, 0, 0, 0.1)',
-                })
-              }}
-            >
-              {item.icon}
-            </IconButton>
-          ))}
-        </Box>
+        
+        <Box sx={{ flexGrow: 1 }} />
+        
+        {navItems.map((item) => (
+          <IconButton
+            key={item.value}
+            onClick={() => onViewChange(item.value)}
+            sx={{
+              ml: { xs: 1, sm: 2 },
+              color: currentView === item.value ? 'primary.contrastText' : 'rgba(0,0,0,0.7)',
+              bgcolor: currentView === item.value ? 'rgba(0,0,0,0.1)' : 'transparent',
+              '&:hover': {
+                bgcolor: 'rgba(0,0,0,0.1)'
+              },
+              width: { xs: '40px', sm: '50px' }, // Slightly larger icons on desktop
+              height: { xs: '40px', sm: '50px' }
+            }}
+          >
+            {item.icon}
+          </IconButton>
+        ))}
       </Toolbar>
     </AppBar>
   );
