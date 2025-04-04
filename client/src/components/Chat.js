@@ -485,11 +485,9 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
                     <ListItemAvatar>
                       <Avatar 
                         alt="HealthBuddy" 
-                        src="/healthbuddy-avatar.png"
+                        src="/healthbuddy_logo_round.png"
                         sx={{ bgcolor: 'primary.main', width: 40, height: 40 }}
-                      >
-                        HB
-                      </Avatar>
+                      />
                     </ListItemAvatar>
                   )}
                   <Paper
@@ -520,11 +518,9 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
                   <ListItemAvatar>
                     <Avatar 
                       alt="HealthBuddy" 
-                      src="/healthbuddy-avatar.png"
+                      src="/healthbuddy_logo_round.png"
                       sx={{ bgcolor: 'primary.main', width: 40, height: 40 }}
-                    >
-                      HB
-                    </Avatar>
+                    />
                   </ListItemAvatar>
                   <Paper
                     elevation={0}
