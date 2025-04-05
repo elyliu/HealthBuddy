@@ -64,6 +64,7 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
   const sendWelcomeMessage = useCallback(async (userId, isNewUser, reminders, goals) => {
     try {
       console.log('[Welcome] Starting sendWelcomeMessage for user:', userId);
+      setIsTyping(true); // Add typing indicator for welcome message
 
       const dayOfWeek = new Date().toLocaleDateString('en-US', { 
         weekday: 'long',
@@ -129,6 +130,8 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
     } catch (error) {
       console.error('[Welcome] Error sending welcome message:', error);
       setError('Failed to send welcome message. Please try again.');
+    } finally {
+      setIsTyping(false); // Remove typing indicator
     }
   }, [activities]);
 
@@ -333,6 +336,7 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
     setInput('');
     setLoading(true);
     setError(null);
+    setIsTyping(true); // Add typing indicator when sending message
 
     // Add user message to chat
     const newUserMessage = { content: userMessage, sender: 'You' };
@@ -412,6 +416,7 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
       setError('Failed to send message. Please try again.');
     } finally {
       setLoading(false);
+      setIsTyping(false); // Remove typing indicator
     }
   };
 
@@ -476,6 +481,7 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
           overflowY: 'auto',
           display: 'flex',
           flexDirection: 'column',
+          scrollBehavior: 'smooth',
           maxHeight: {
             xs: 'calc(100vh - 180px)', // More space for mobile browser chrome
             sm: 'calc(100vh - 144px)'
