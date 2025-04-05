@@ -149,10 +149,25 @@ const ActivityList = ({ activities, onUpdate }) => {
     <>
       <List>
         {activities.map((activity) => (
-          <ListItem key={activity.id}>
+          <ListItem 
+            key={activity.id}
+            sx={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'flex-start',
+              pr: { xs: '100px', sm: '120px' }, // Make space for buttons
+              position: 'relative'
+            }}
+          >
             <ListItemText
               primary={activity.description}
               secondary={new Date(activity.date).toLocaleDateString()}
+              sx={{
+                mr: 2,
+                '& .MuiTypography-root': {
+                  wordBreak: 'break-word' // Allow text to break to prevent overflow
+                }
+              }}
             />
             <ListItemSecondaryAction>
               <IconButton 
