@@ -367,94 +367,96 @@ function Profile() {
           bgcolor: 'background.default',
           borderRadius: 2,
           position: 'relative',
-          overflow: 'hidden',
-          height: '100%'
+          height: '100%',
+          overflow: 'auto'
         }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3 }}>
-            <Typography variant="h5" gutterBottom>
-              {user?.user_metadata?.name || 'User'}
-            </Typography>
-            <Typography color="textSecondary" gutterBottom>
-              {user?.email}
-            </Typography>
-          </Box>
-
-          <Divider sx={{ my: 3 }} />
-
-          {activities?.length > 0 && (
-            <>
-              <Box sx={{ mb: 3, textAlign: 'center' }}>
-                <Typography variant="h5" gutterBottom>
-                  Lifetime Stars Earned
-                </Typography>
-                <Typography variant="h4" sx={{ color: 'primary.main' }}>
-                  {activities.length} {'⭐'.repeat(Math.min(activities.length, 5))}
-                </Typography>
-              </Box>
-              <Divider sx={{ my: 3 }} />
-            </>
-          )}
-
-          <Box sx={{ mb: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6">Your Goals</Typography>
-              <IconButton onClick={() => handleOpenGoalDialog()} color="primary">
-                <AddIcon />
-              </IconButton>
-            </Box>
-            <List>
-              {goals.map((goal) => (
-                <ListItem
-                  key={goal.id}
-                  secondaryAction={
-                    <Box>
-                      <IconButton edge="end" onClick={() => handleOpenGoalDialog(goal)} sx={{ mr: 1 }}>
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton edge="end" onClick={() => handleDeleteGoal(goal.id)}>
-                        <DeleteIcon />
-                      </IconButton>
-                    </Box>
-                  }
-                >
-                  <ListItemText primary={goal.goal_text} />
-                </ListItem>
-              ))}
-              {goals.length === 0 && (
-                <ListItem>
-                  <ListItemText primary="No goals yet. Add one to get started!" />
-                </ListItem>
-              )}
-            </List>
-          </Box>
-
-          <Divider sx={{ my: 3 }} />
-
-          <Box sx={{ mb: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6">Things I Should Keep in Mind</Typography>
-              <IconButton onClick={handleOpenReminderDialog} color="primary">
-                <EditIcon />
-              </IconButton>
-            </Box>
-            <Paper variant="outlined" sx={{ p: 2, minHeight: 100 }}>
-              <Typography>
-                {reminders || 'No reminders set. Click the edit button to add some!'}
+          <Box sx={{ p: 2 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3 }}>
+              <Typography variant="h5" gutterBottom>
+                {user?.user_metadata?.name || 'User'}
               </Typography>
-            </Paper>
+              <Typography color="textSecondary" gutterBottom>
+                {user?.email}
+              </Typography>
+            </Box>
+
+            <Divider sx={{ my: 3 }} />
+
+            {activities?.length > 0 && (
+              <>
+                <Box sx={{ mb: 3, textAlign: 'center' }}>
+                  <Typography variant="h5" gutterBottom>
+                    Lifetime Stars Earned
+                  </Typography>
+                  <Typography variant="h4" sx={{ color: 'primary.main' }}>
+                    {activities.length} {'⭐'.repeat(Math.min(activities.length, 5))}
+                  </Typography>
+                </Box>
+                <Divider sx={{ my: 3 }} />
+              </>
+            )}
+
+            <Box sx={{ mb: 3 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="h6">Your Goals</Typography>
+                <IconButton onClick={() => handleOpenGoalDialog()} color="primary">
+                  <AddIcon />
+                </IconButton>
+              </Box>
+              <List>
+                {goals.map((goal) => (
+                  <ListItem
+                    key={goal.id}
+                    secondaryAction={
+                      <Box>
+                        <IconButton edge="end" onClick={() => handleOpenGoalDialog(goal)} sx={{ mr: 1 }}>
+                          <EditIcon />
+                        </IconButton>
+                        <IconButton edge="end" onClick={() => handleDeleteGoal(goal.id)}>
+                          <DeleteIcon />
+                        </IconButton>
+                      </Box>
+                    }
+                  >
+                    <ListItemText primary={goal.goal_text} />
+                  </ListItem>
+                ))}
+                {goals.length === 0 && (
+                  <ListItem>
+                    <ListItemText primary="No goals yet. Add one to get started!" />
+                  </ListItem>
+                )}
+              </List>
+            </Box>
+
+            <Divider sx={{ my: 3 }} />
+
+            <Box sx={{ mb: 3 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="h6">Things I Should Keep in Mind</Typography>
+                <IconButton onClick={handleOpenReminderDialog} color="primary">
+                  <EditIcon />
+                </IconButton>
+              </Box>
+              <Paper variant="outlined" sx={{ p: 2, minHeight: 100 }}>
+                <Typography>
+                  {reminders || 'No reminders set. Click the edit button to add some!'}
+                </Typography>
+              </Paper>
+            </Box>
+
+            <Divider sx={{ my: 3 }} />
+
+            <Button
+              variant="contained"
+              color="error"
+              onClick={handleSignOut}
+              fullWidth
+              sx={{ mt: 2, mb: 2 }}
+            >
+              Sign Out
+            </Button>
           </Box>
-
-          <Divider sx={{ my: 3 }} />
-
-          <Button
-            variant="contained"
-            color="error"
-            onClick={handleSignOut}
-            fullWidth
-            sx={{ mt: 2 }}
-          >
-            Sign Out
-          </Button>
         </Box>
 
         <Dialog open={openGoalDialog} onClose={handleCloseGoalDialog}>
