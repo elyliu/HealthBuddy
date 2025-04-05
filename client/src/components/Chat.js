@@ -495,7 +495,11 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
         <List sx={{
           width: '100%',
           display: 'flex',
-          flexDirection: 'column'
+          flexDirection: 'column',
+          pt: {
+            xs: 3, // 24px padding top on mobile
+            sm: 2  // 16px padding top on desktop
+          }
         }}>
           {messages.map((message, index) => (
             <ListItem 
