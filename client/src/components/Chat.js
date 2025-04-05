@@ -476,14 +476,20 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
           overflowY: 'auto',
           display: 'flex',
           flexDirection: 'column',
-          maxHeight: 'calc(100vh - 144px)' // Viewport height minus navbar and input box
+          maxHeight: {
+            xs: 'calc(100vh - 180px)', // More space for mobile browser chrome
+            sm: 'calc(100vh - 144px)'
+          },
+          pb: {
+            xs: '100px', // More padding on mobile
+            sm: '80px'
+          }
         }}
       >
         <List sx={{
           width: '100%',
           display: 'flex',
-          flexDirection: 'column',
-          pb: '16px'
+          flexDirection: 'column'
         }}>
           {messages.map((message, index) => (
             <ListItem 
@@ -583,7 +589,10 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
           bottom: 0,
           left: 0,
           right: 0,
-          height: '80px',
+          height: {
+            xs: '90px', // Taller on mobile
+            sm: '80px'
+          },
           bgcolor: 'background.paper',
           borderTop: 1,
           borderColor: 'divider',
@@ -591,7 +600,10 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
           alignItems: 'center',
           p: 2,
           zIndex: 1200,
-          boxShadow: '0px -2px 4px rgba(0,0,0,0.05)'
+          boxShadow: '0px -2px 4px rgba(0,0,0,0.05)',
+          '@media (max-width: 600px)': {
+            paddingBottom: 'env(safe-area-inset-bottom)' // Handle iPhone home indicator
+          }
         }}
       >
         <Container maxWidth="md" sx={{ 
