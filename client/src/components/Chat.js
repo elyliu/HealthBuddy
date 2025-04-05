@@ -36,6 +36,7 @@ const loadingDots = keyframes`
 
 function Chat({ activities, onActivityAdded, onActivityUpdate }) {
   const [messages, setMessages] = useState([]);
+  const [historicalMessages, setHistoricalMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -347,19 +348,6 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
         throw new Error('Please log in to continue');
       }
 
-      // Store user message in database
-      const { error: userMessageError } = await supabase
-        .from('chat_messages')
-        .insert({
-          user_id: user.id,
-          user_message: userMessage,
-          timestamp: new Date().toISOString()
-        });
-
-      if (userMessageError) {
-        console.error('Error storing user message:', userMessageError);
-      }
-
       // Add user message to messages array first
       const newMessages = [...messages, newUserMessage];
       setMessages(newMessages);
@@ -387,7 +375,7 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
             description: goal.goal_text
           }))
         },
-        messages: contextMessages,
+        messages: [...historicalMessages, ...contextMessages],
         systemPrompt: `You are HealthBuddy, a supportive and knowledgeable AI health coach. Your communication style is:
           - Friendly and encouraging, but professional
           - Focused on sustainable, long-term health habits
@@ -427,8 +415,8 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
       const newAIMessage = { content: data.message, sender: 'HealthBuddy' };
       setMessages(prev => [...prev, newAIMessage]);
 
-      // Store bot response in database
-      const { error: botResponseError } = await supabase
+      // Store both user message and bot response together
+      const { error: chatMessageError } = await supabase
         .from('chat_messages')
         .insert({
           user_id: user.id,
@@ -437,8 +425,8 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
           timestamp: new Date().toISOString()
         });
 
-      if (botResponseError) {
-        console.error('Error storing bot response:', botResponseError);
+      if (chatMessageError) {
+        console.error('Error storing chat message:', chatMessageError);
       }
 
     } catch (error) {
@@ -485,6 +473,52 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
       return () => clearTimeout(timeoutId);
     }
   }, [loading]);
+
+  // Add function to fetch historical messages
+  const fetchHistoricalMessages = useCallback(async () => {
+    if (!user?.id) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('chat_messages')
+        .select('user_message, bot_response, timestamp')
+        .eq('user_id', user.id)
+        .order('timestamp', { ascending: false })
+        .limit(100);
+
+      if (error) {
+        console.error('Error fetching historical messages:', error);
+        return;
+      }
+
+      // Transform the data into the format we need
+      const transformedMessages = data.flatMap(msg => {
+        const messages = [];
+        if (msg.user_message) {
+          messages.push({
+            role: 'user',
+            content: msg.user_message
+          });
+        }
+        if (msg.bot_response) {
+          messages.push({
+            role: 'assistant',
+            content: msg.bot_response
+          });
+        }
+        return messages;
+      });
+
+      setHistoricalMessages(transformedMessages.reverse());
+    } catch (error) {
+      console.error('Error in fetchHistoricalMessages:', error);
+    }
+  }, [user?.id]);
+
+  // Add effect to fetch historical messages when user changes
+  useEffect(() => {
+    fetchHistoricalMessages();
+  }, [fetchHistoricalMessages]);
 
   return (
     <Container maxWidth="md" sx={{ 
