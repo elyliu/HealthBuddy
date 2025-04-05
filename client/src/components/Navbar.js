@@ -11,7 +11,7 @@ import {
   Chat as ChatIcon,
   Person as PersonIcon,
   Info as InfoIcon,
-  FitnessCenter as FitnessCenterIcon
+  Star as StarIcon
 } from '@mui/icons-material';
 
 function Navbar({ currentView, onViewChange }) {
@@ -20,7 +20,7 @@ function Navbar({ currentView, onViewChange }) {
 
   const navItems = [
     { label: 'Chat', icon: <ChatIcon />, value: 'chat' },
-    { label: 'Activities', icon: <FitnessCenterIcon />, value: 'activities' },
+    { label: 'Activities', icon: <StarIcon />, value: 'activities' },
     { label: 'Profile', icon: <PersonIcon />, value: 'profile' },
     { label: 'About', icon: <InfoIcon />, value: 'about' }
   ];

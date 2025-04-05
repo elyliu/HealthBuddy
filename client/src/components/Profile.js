@@ -37,6 +37,7 @@ function Profile() {
   const [goalText, setGoalText] = useState('');
   const [reminders, setReminders] = useState('');
   const [openReminderDialog, setOpenReminderDialog] = useState(false);
+  const [activities, setActivities] = useState([]);
 
   useEffect(() => {
     // Check if user is already authenticated
@@ -56,6 +57,7 @@ function Profile() {
           setUser(session.user);
           fetchGoals(session.user.id);
           fetchReminders(session.user.id);
+          fetchActivities(session.user.id);
         }
       } catch (error) {
         console.error('Error checking session:', error.message);
@@ -72,6 +74,7 @@ function Profile() {
       if (session?.user) {
         fetchGoals(session.user.id);
         fetchReminders(session.user.id);
+        fetchActivities(session.user.id);
       }
     });
 
@@ -105,6 +108,21 @@ function Profile() {
       setReminders(data?.reminders || '');
     } catch (error) {
       console.error('Error fetching reminders:', error);
+    }
+  };
+
+  const fetchActivities = async (userId) => {
+    try {
+      const { data, error } = await supabase
+        .from('activities')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setActivities(data || []);
+    } catch (error) {
+      console.error('Error fetching activities:', error);
     }
   };
 
@@ -362,6 +380,20 @@ function Profile() {
           </Box>
 
           <Divider sx={{ my: 3 }} />
+
+          {activities?.length > 0 && (
+            <>
+              <Box sx={{ mb: 3, textAlign: 'center' }}>
+                <Typography variant="h5" gutterBottom>
+                  Lifetime Stars Earned
+                </Typography>
+                <Typography variant="h4" sx={{ color: 'primary.main' }}>
+                  {activities.length} {'⭐'.repeat(Math.min(activities.length, 5))}
+                </Typography>
+              </Box>
+              <Divider sx={{ my: 3 }} />
+            </>
+          )}
 
           <Box sx={{ mb: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>

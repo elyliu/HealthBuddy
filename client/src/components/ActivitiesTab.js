@@ -57,16 +57,46 @@ function ActivitiesTab({ activities, onActivityAdded, onActivityUpdate }) {
         <Paper 
           elevation={0} 
           sx={{ 
+            p: 2,
+            mb: 2,
+            bgcolor: 'background.paper',
+            borderRadius: '12px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 1
+          }}
+        >
+          {/* Weekly Summary */}
+          <Typography variant="h5" sx={{ color: 'text.primary' }}>
+            Last 7 Days
+          </Typography>
+          <Typography variant="body1">
+            {(() => {
+              const sevenDaysAgo = new Date();
+              sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+              const recentActivities = activities.filter(
+                activity => new Date(activity.date) >= sevenDaysAgo
+              );
+              const count = recentActivities.length;
+              const stars = '⭐'.repeat(count);
+              return `You've logged ${count} healthy ${count === 1 ? 'activity' : 'activities'}, which earned you ${stars}!`;
+            })()}
+          </Typography>
+        </Paper>
+
+        <Paper 
+          elevation={0} 
+          sx={{ 
             p: 2, 
             display: 'flex', 
             justifyContent: 'space-between',
             alignItems: 'center',
             bgcolor: 'background.paper',
-            borderRadius: '12px 12px 0 0'
+            borderRadius: '12px'
           }}
         >
           <Typography variant="h5" sx={{ color: 'text.primary' }}>
-            Your Activities
+            Your Healthy Activities
           </Typography>
           <Fab
             color="primary"
