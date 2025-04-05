@@ -52,7 +52,12 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
   const theme = useTheme();
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesEndRef.current) {
+      const scrollContainer = messagesEndRef.current.closest('[role="presentation"]');
+      if (scrollContainer) {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+      }
+    }
   };
 
   // Separate function to handle welcome message
@@ -296,6 +301,12 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    if (!loading) {
+      scrollToBottom();
+    }
+  }, [loading]);
+
   const handleWelcomeModalClose = async () => {
     try {
       if (user?.id) {
@@ -426,88 +437,71 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
     onActivityUpdate(updatedActivities);
   };
 
+  // Add effect to scroll when messages change
+  useEffect(() => {
+    const timeoutId = setTimeout(scrollToBottom, 100);
+    return () => clearTimeout(timeoutId);
+  }, [messages]);
+
+  // Add effect to scroll when loading changes
+  useEffect(() => {
+    if (!loading) {
+      const timeoutId = setTimeout(scrollToBottom, 100);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [loading]);
+
   return (
     <Container maxWidth="md" sx={{ 
       height: '100%',
       display: 'flex',
       flexDirection: 'column',
-      overflow: 'hidden',
       position: 'fixed',
       top: 64, // Height of navbar
       left: 0,
       right: 0,
       bottom: 0
     }}>
-      <Box sx={{ 
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-        position: 'relative',
-        pb: '80px' // Add padding at bottom to account for input box height
-      }}>
-        {error && (
-          <Alert severity="error" sx={{ m: 2, borderRadius: 2 }}>
-            {error}
-          </Alert>
-        )}
+      {error && (
+        <Alert severity="error" sx={{ m: 2, borderRadius: 2 }}>
+          {error}
+        </Alert>
+      )}
 
-        <Box sx={{ 
+      {/* Messages Container */}
+      <Box 
+        role="presentation"
+        sx={{ 
           flex: 1,
-          overflow: 'auto',
-          px: 2,
-          py: 1,
-          bgcolor: alpha(theme.palette.primary.main, 0.03)
+          overflowY: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+          maxHeight: 'calc(100vh - 144px)' // Viewport height minus navbar and input box
+        }}
+      >
+        <List sx={{
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          pb: '16px'
         }}>
-          <List>
-            {messages.map((message, index) => (
-              <ListItem 
-                key={index} 
-                sx={{ 
-                  flexDirection: 'column',
-                  alignItems: message.sender === 'You' ? 'flex-end' : 'flex-start',
-                  mb: 0.5
-                }}
-              >
-                <Box sx={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  maxWidth: '80%'
-                }}>
-                  {message.sender !== 'You' && (
-                    <ListItemAvatar>
-                      <Avatar 
-                        alt="HealthBuddy" 
-                        src="/healthbuddy_logo_round.png"
-                        sx={{ bgcolor: 'primary.main', width: 40, height: 40 }}
-                      />
-                    </ListItemAvatar>
-                  )}
-                  <Paper
-                    elevation={0}
-                    sx={{
-                      p: 2,
-                      bgcolor: message.sender === 'You' ? 'primary.main' : 'background.paper',
-                      color: message.sender === 'You' ? 'primary.contrastText' : 'text.primary',
-                      borderRadius: 2,
-                      maxWidth: '100%'
-                    }}
-                  >
-                    <Typography variant="body1">
-                      {message.content}
-                    </Typography>
-                  </Paper>
-                </Box>
-              </ListItem>
-            ))}
-
-            {isTyping && (
-              <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', mb: 0.5 }}>
-                <Box sx={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  maxWidth: '80%'
-                }}>
+          {messages.map((message, index) => (
+            <ListItem 
+              key={index} 
+              sx={{ 
+                flexDirection: 'column',
+                alignItems: message.sender === 'You' ? 'flex-end' : 'flex-start',
+                mb: 2,
+                width: '100%',
+                px: 2
+              }}
+            >
+              <Box sx={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                maxWidth: '80%'
+              }}>
+                {message.sender !== 'You' && (
                   <ListItemAvatar>
                     <Avatar 
                       alt="HealthBuddy" 
@@ -515,55 +509,100 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
                       sx={{ bgcolor: 'primary.main', width: 40, height: 40 }}
                     />
                   </ListItemAvatar>
-                  <Paper
-                    elevation={0}
+                )}
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 2,
+                    bgcolor: message.sender === 'You' ? 'primary.main' : 'background.paper',
+                    color: message.sender === 'You' ? 'primary.contrastText' : 'text.primary',
+                    borderRadius: 2,
+                    maxWidth: '100%',
+                    wordBreak: 'break-word'
+                  }}
+                >
+                  <Typography variant="body1">
+                    {message.content}
+                  </Typography>
+                </Paper>
+              </Box>
+            </ListItem>
+          ))}
+
+          {isTyping && (
+            <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', mb: 1 }}>
+              <Box sx={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                maxWidth: '80%'
+              }}>
+                <ListItemAvatar>
+                  <Avatar 
+                    alt="HealthBuddy" 
+                    src="/healthbuddy_logo_round.png"
+                    sx={{ bgcolor: 'primary.main', width: 40, height: 40 }}
+                  />
+                </ListItemAvatar>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 2,
+                    bgcolor: 'background.paper',
+                    borderRadius: 2,
+                    position: 'relative'
+                  }}
+                >
+                  <Typography 
+                    variant="body1" 
                     sx={{
-                      p: 2,
-                      bgcolor: 'background.paper',
-                      borderRadius: 2,
-                      position: 'relative'
+                      '&::after': {
+                        content: '""',
+                        animation: `${loadingDots} 1s infinite`,
+                      }
                     }}
                   >
-                    <Typography 
-                      variant="body1" 
-                      sx={{
-                        '&::after': {
-                          content: '""',
-                          animation: `${loadingDots} 1s infinite`,
-                        }
-                      }}
-                    >
-                      Typing
-                    </Typography>
-                  </Paper>
-                </Box>
-              </ListItem>
-            )}
-            <div ref={messagesEndRef} />
-          </List>
-        </Box>
+                    Typing
+                  </Typography>
+                </Paper>
+              </Box>
+            </ListItem>
+          )}
+          <div ref={messagesEndRef} />
+        </List>
+      </Box>
 
-        <Box sx={{ 
-          p: 2, 
-          bgcolor: 'background.paper',
-          borderTop: 1,
-          borderColor: 'divider',
+      {/* Input Box Container */}
+      <Box 
+        component="form"
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSend();
+        }}
+        sx={{ 
           position: 'fixed',
           bottom: 0,
           left: 0,
           right: 0,
-          zIndex: 1000,
-          width: '100%',
           height: '80px',
+          bgcolor: 'background.paper',
+          borderTop: 1,
+          borderColor: 'divider',
           display: 'flex',
-          alignItems: 'center'
+          alignItems: 'center',
+          p: 2,
+          zIndex: 1200,
+          boxShadow: '0px -2px 4px rgba(0,0,0,0.05)'
+        }}
+      >
+        <Container maxWidth="md" sx={{ 
+          height: '100%',
+          mx: 'auto'
         }}>
           <Box sx={{ 
             display: 'flex',
             gap: 1,
             width: '100%',
-            maxWidth: 'md',
-            mx: 'auto'
+            alignItems: 'center'
           }}>
             <TextField
               fullWidth
@@ -581,8 +620,8 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
               }}
             />
             <IconButton 
+              type="submit"
               color="primary" 
-              onClick={handleSend}
               disabled={loading || !input.trim()}
               sx={{
                 ml: 1,
@@ -603,7 +642,7 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
               {loading ? <CircularProgress size={24} color="inherit" /> : <SendIcon />}
             </IconButton>
           </Box>
-        </Box>
+        </Container>
       </Box>
 
       <AddActivityDialog
