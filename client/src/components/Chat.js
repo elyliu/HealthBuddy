@@ -78,6 +78,36 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
         timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
       });
       
+      // Fetch historical messages for context
+      const { data: chatHistory, error: chatError } = await supabase
+        .from('chat_messages')
+        .select('user_message, bot_response, timestamp')
+        .eq('user_id', userId)
+        .order('timestamp', { ascending: false })
+        .limit(100);
+
+      if (chatError) {
+        console.error('[Welcome] Error fetching chat history:', chatError);
+      }
+
+      // Transform chat history into messages array
+      const historicalContext = (chatHistory || []).flatMap(msg => {
+        const messages = [];
+        if (msg.user_message) {
+          messages.push({
+            role: 'user',
+            content: msg.user_message
+          });
+        }
+        if (msg.bot_response) {
+          messages.push({
+            role: 'assistant',
+            content: msg.bot_response
+          });
+        }
+        return messages;
+      }).reverse();
+      
       const requestBody = {
         message: isNewUser 
           ? "Hi! I'm your AI health buddy. How can I help you today?"
@@ -91,9 +121,12 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
           dayOfWeek: dayOfWeek,
           timeOfDay: timeOfDay
         },
+        messages: historicalContext,
         systemPrompt: `You are a supportive, positive, and energetic AI health buddy. 
-        Your role is to help users maintain and improve their long-term and sustainable healthy habits. You have access to their recent activities.
-        It's currently ${dayOfWeek} at ${timeOfDay}. Let's start with some brief small talk based on day of week and time of day and celebrate any recent wins to motivate them. Keep response to 2-3 sentences max.
+        Your role is to help users maintain and improve their long-term and sustainable healthy habits. You have access to their recent activities and chat history.
+        It's currently ${dayOfWeek} at ${timeOfDay}. 
+        ${historicalContext.length > 0 ? "You have previous conversations with this user - use this context to provide personalized responses and avoid asking questions they've already answered." : "This is a new user - welcome them warmly."}
+        Let's start with some brief small talk based on day of week and time of day and celebrate any recent wins to motivate them. Keep response to 2-3 sentences max.
         `
       };
 
