@@ -336,7 +336,7 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
     setInput('');
     setLoading(true);
     setError(null);
-    setIsTyping(true); // Add typing indicator when sending message
+    setIsTyping(true);
 
     // Add user message to chat
     const newUserMessage = { content: userMessage, sender: 'You' };
@@ -345,6 +345,19 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
     try {
       if (!user?.id) {
         throw new Error('Please log in to continue');
+      }
+
+      // Store user message in database
+      const { error: userMessageError } = await supabase
+        .from('chat_messages')
+        .insert({
+          user_id: user.id,
+          user_message: userMessage,
+          timestamp: new Date().toISOString()
+        });
+
+      if (userMessageError) {
+        console.error('Error storing user message:', userMessageError);
       }
 
       // Add user message to messages array first
@@ -359,7 +372,7 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
           content: msg.content
         }));
 
-      console.log('Sending messages context:', contextMessages); // Add logging
+      console.log('Sending messages context:', contextMessages);
 
       const requestBody = {
         message: userMessage,
@@ -391,7 +404,7 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
           Use this information to provide relevant, personalized guidance. Reference specific goals and activities when appropriate to make responses more personal and contextual. Remember to ALWAYS keep responses to 2-3 sentences maximum and maintain conversation context by referencing previous messages when relevant.`
       };
 
-      console.log('Full request body:', requestBody); // Add logging
+      console.log('Full request body:', requestBody);
 
       const response = await fetch(`${config.serverUrl}/api/chat`, {
         method: 'POST',
@@ -407,16 +420,33 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
 
       const data = await response.json();
       
+      // Remove typing indicator before showing response
+      setIsTyping(false);
+      
       // Add AI response to chat
       const newAIMessage = { content: data.message, sender: 'HealthBuddy' };
       setMessages(prev => [...prev, newAIMessage]);
 
+      // Store bot response in database
+      const { error: botResponseError } = await supabase
+        .from('chat_messages')
+        .insert({
+          user_id: user.id,
+          user_message: userMessage,
+          bot_response: data.message,
+          timestamp: new Date().toISOString()
+        });
+
+      if (botResponseError) {
+        console.error('Error storing bot response:', botResponseError);
+      }
+
     } catch (error) {
       console.error('Error in chat:', error);
       setError('Failed to send message. Please try again.');
+      setIsTyping(false);
     } finally {
       setLoading(false);
-      setIsTyping(false); // Remove typing indicator
     }
   };
 
