@@ -216,19 +216,6 @@ function App() {
     }
   }, [user]);
 
-  const renderContent = () => {
-    switch (currentView) {
-      case 'activities':
-        return <ActivitiesTab activities={activities} onActivityAdded={handleActivityAdded} />;
-      case 'profile':
-        return <Profile />;
-      case 'about':
-        return <About />;
-      default:
-        return <Chat activities={activities} onActivityAdded={handleActivityAdded} />;
-    }
-  };
-
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -236,7 +223,8 @@ function App() {
         <Box sx={{ 
           display: 'flex',
           flexDirection: 'column',
-          minHeight: '100vh',
+          height: '100vh',
+          overflow: 'hidden',
           bgcolor: 'background.default'
         }}>
           <Navbar currentView={currentView} onViewChange={setCurrentView} />
@@ -245,11 +233,40 @@ function App() {
             sx={{ 
               flexGrow: 1,
               width: '100%',
-              paddingTop: { xs: '100px', sm: '100px' }, // Increase padding to ensure content starts below navbar
-              paddingBottom: { xs: '20px', sm: '20px' }
+              position: 'relative',
+              mt: { xs: '80px', sm: '64px' }, // Account for navbar height
+              height: { xs: 'calc(100vh - 80px)', sm: 'calc(100vh - 64px)' }, // Subtract navbar height
+              overflow: 'hidden'
             }}
           >
-            {renderContent()}
+            <Box sx={{ 
+              display: currentView === 'activities' ? 'block' : 'none',
+              height: '100%',
+              overflow: 'auto'
+            }}>
+              <ActivitiesTab activities={activities} onActivityAdded={handleActivityAdded} />
+            </Box>
+            <Box sx={{ 
+              display: currentView === 'profile' ? 'block' : 'none',
+              height: '100%',
+              overflow: 'auto'
+            }}>
+              <Profile />
+            </Box>
+            <Box sx={{ 
+              display: currentView === 'about' ? 'block' : 'none',
+              height: '100%',
+              overflow: 'auto'
+            }}>
+              <About />
+            </Box>
+            <Box sx={{ 
+              display: currentView === 'chat' ? 'block' : 'none',
+              height: '100%',
+              overflow: 'hidden'
+            }}>
+              <Chat activities={activities} onActivityAdded={handleActivityAdded} />
+            </Box>
           </Box>
         </Box>
       </Router>
