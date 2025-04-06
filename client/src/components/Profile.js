@@ -355,9 +355,9 @@ function Profile() {
         sx={{ 
           display: 'flex',
           flexDirection: 'column',
-          flex: 1,
           height: '100%',
-          p: { xs: 2, sm: 3 }
+          p: { xs: 2, sm: 3 },
+          overflow: 'hidden'
         }}
       >
         <Box sx={{ 
@@ -367,7 +367,7 @@ function Profile() {
           bgcolor: 'background.default',
           borderRadius: 2,
           overflow: 'auto',
-          WebkitOverflowScrolling: 'touch' // For smooth scrolling on iOS
+          WebkitOverflowScrolling: 'touch'
         }}>
           <Paper 
             elevation={0}
@@ -377,7 +377,10 @@ function Profile() {
               background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
               backdropFilter: 'blur(10px)',
               border: '1px solid',
-              borderColor: 'divider'
+              borderColor: 'divider',
+              display: 'flex',
+              flexDirection: 'column',
+              width: '100%'
             }}
           >
             <Box sx={{ mb: 3 }}>
@@ -520,22 +523,21 @@ function Profile() {
               </Paper>
             </Box>
 
-            <Divider sx={{ my: 3 }} />
-
-            <Button
-              variant="contained"
-              color="error"
-              onClick={handleSignOut}
-              fullWidth
-              sx={{ 
-                mt: 2, 
-                mb: 2,
-                py: 1.5,
-                borderRadius: 2
-              }}
-            >
-              Sign Out
-            </Button>
+            <Box sx={{ mt: 'auto', pt: 3 }}>
+              <Divider sx={{ mb: 3 }} />
+              <Button
+                variant="contained"
+                color="error"
+                onClick={handleSignOut}
+                fullWidth
+                sx={{ 
+                  py: 1.5,
+                  borderRadius: 2
+                }}
+              >
+                Sign Out
+              </Button>
+            </Box>
           </Paper>
         </Box>
 
@@ -594,10 +596,8 @@ function Profile() {
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        pt: 0,
-        pb: 2,
-        px: { xs: 0, sm: 2 },
-        position: 'relative'
+        p: { xs: 2, sm: 3 },
+        overflow: 'hidden'
       }}
     >
       <Box sx={{ 
@@ -606,79 +606,93 @@ function Profile() {
         flexDirection: 'column',
         bgcolor: 'background.default',
         borderRadius: 2,
-        position: 'relative',
-        overflow: 'hidden',
-        height: '100%'
+        overflow: 'auto',
+        WebkitOverflowScrolling: 'touch'
       }}>
-        {error && (
-          <Alert severity="error" sx={{ m: 2 }}>{error}</Alert>
-        )}
-        {success && (
-          <Alert severity="success" sx={{ m: 2 }}>{success}</Alert>
-        )}
-        <Typography variant="h5" gutterBottom align="center">
-          {isSignUp ? 'Create Account' : 'Sign In'}
-        </Typography>
+        <Paper
+          elevation={0}
+          sx={{
+            p: { xs: 2, sm: 4 },
+            borderRadius: 2,
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid',
+            borderColor: 'divider',
+            display: 'flex',
+            flexDirection: 'column',
+            minHeight: '100%'
+          }}
+        >
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
+          )}
+          {success && (
+            <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>
+          )}
+          <Typography variant="h5" gutterBottom align="center">
+            {isSignUp ? 'Create Account' : 'Sign In'}
+          </Typography>
 
-        <form onSubmit={handleAuth}>
-          {isSignUp && (
+          <form onSubmit={handleAuth}>
+            {isSignUp && (
+              <TextField
+                fullWidth
+                label="Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                margin="normal"
+                required
+              />
+            )}
+
             <TextField
               fullWidth
-              label="Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              label="Email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               margin="normal"
               required
             />
-          )}
 
-          <TextField
-            fullWidth
-            label="Email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            margin="normal"
-            required
-          />
+            <TextField
+              fullWidth
+              label="Password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              margin="normal"
+              required
+            />
 
-          <TextField
-            fullWidth
-            label="Password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            margin="normal"
-            required
-          />
+            <Button
+              type="submit"
+              variant="contained"
+              fullWidth
+              disabled={loading}
+              sx={{ mt: 3 }}
+            >
+              {loading ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : isSignUp ? (
+                'Sign Up'
+              ) : (
+                'Sign In'
+              )}
+            </Button>
 
-          <Button
-            type="submit"
-            variant="contained"
-            fullWidth
-            disabled={loading}
-            sx={{ mt: 3 }}
-          >
-            {loading ? (
-              <CircularProgress size={24} color="inherit" />
-            ) : isSignUp ? (
-              'Sign Up'
-            ) : (
-              'Sign In'
-            )}
-          </Button>
-
-          <Button
-            variant="text"
-            fullWidth
-            onClick={() => setIsSignUp(!isSignUp)}
-            sx={{ mt: 2 }}
-          >
-            {isSignUp
-              ? 'Already have an account? Sign In'
-              : "Don't have an account? Sign Up"}
-          </Button>
-        </form>
+            <Button
+              variant="text"
+              fullWidth
+              onClick={() => setIsSignUp(!isSignUp)}
+              sx={{ mt: 2 }}
+            >
+              {isSignUp
+                ? 'Already have an account? Sign In'
+                : "Don't have an account? Sign Up"}
+            </Button>
+          </form>
+        </Paper>
       </Box>
     </Container>
   );
