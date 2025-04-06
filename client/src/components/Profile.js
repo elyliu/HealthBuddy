@@ -353,7 +353,7 @@ function Profile() {
       <Container 
         maxWidth="md" 
         sx={{ 
-          height: '100%',
+          height: { xs: 'calc(100vh - 80px)', sm: 'calc(100vh - 64px)' },
           p: { xs: 2, sm: 3 }
         }}
       >
@@ -370,7 +370,11 @@ function Profile() {
             display: 'flex',
             flexDirection: 'column',
             overflow: 'auto',
-            WebkitOverflowScrolling: 'touch'
+            WebkitOverflowScrolling: 'touch',
+            position: 'relative',
+            '& > *': {
+              overflow: 'visible'
+            }
           }}
         >
           <Box sx={{ mb: 3 }}>
@@ -582,7 +586,7 @@ function Profile() {
     <Container 
       maxWidth="md" 
       sx={{ 
-        height: '100%',
+        height: { xs: 'calc(100vh - 80px)', sm: 'calc(100vh - 64px)' },
         p: { xs: 2, sm: 3 }
       }}
     >
@@ -599,7 +603,11 @@ function Profile() {
           display: 'flex',
           flexDirection: 'column',
           overflow: 'auto',
-          WebkitOverflowScrolling: 'touch'
+          WebkitOverflowScrolling: 'touch',
+          position: 'relative',
+          '& > *': {
+            overflow: 'visible'
+          }
         }}
       >
         {error && (
