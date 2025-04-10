@@ -45,6 +45,7 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
   const [thingsToKeepInMind, setThingsToKeepInMind] = useState('');
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [user, setUser] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const messagesEndRef = useRef(null);
   const [isTyping, setIsTyping] = useState(false);
   const hasSentWelcomeRef = useRef(false);
@@ -255,50 +256,55 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
     sendInitialWelcomeMessage();
   }, [user?.id]);
 
-  // Add useEffect to set user and fetch data
+  // Add useEffect to check authentication status
   useEffect(() => {
-    let mounted = true;
-
-    const checkUser = async () => {
+    const checkAuth = async () => {
       try {
-        console.log('Checking user session...');
         const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) throw error;
         
-        if (error) {
-          console.error('Session check error:', error);
-          throw error;
-        }
-        
-        console.log('Session check result:', session ? 'Session found' : 'No session');
-        if (session?.user && mounted) {
-          console.log('Setting user:', session.user);
+        if (session?.user) {
           setUser(session.user);
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+          setUser(null);
+          // Set welcome message for non-authenticated users
+          setMessages([{
+            sender: 'HealthBuddy',
+            content: "Hey there, welcome to VitaBuddy! 🎉\nI'm here to help you feel your best—and the more I get to know you, the better I can support you on your journey.\nTap the Profile tab to create an account or log in, and let's get started!\nCan't wait to team up with you! 💪✨"
+          }]);
         }
       } catch (error) {
-        console.error('Error checking user:', error);
-        if (mounted) {
-          setError('Failed to load user data. Please try again.');
-        }
+        console.error('Error checking auth:', error);
+        setIsAuthenticated(false);
+        setUser(null);
+        // Set welcome message for non-authenticated users
+        setMessages([{
+          sender: 'HealthBuddy',
+          content: "Hey there, welcome to VitaBuddy! 🎉\nI'm here to help you feel your best—and the more I get to know you, the better I can support you on your journey.\nTap the Profile tab to create an account or log in, and let's get started!\nCan't wait to team up with you! 💪✨"
+        }]);
       }
     };
 
-    checkUser();
+    checkAuth();
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state changed:', event, session?.user);
-      if (session?.user && mounted) {
+      if (session?.user) {
         setUser(session.user);
-      } else if (mounted) {
+        setIsAuthenticated(true);
+      } else {
+        setIsAuthenticated(false);
         setUser(null);
-        setMessages([]);
+        // Set welcome message for non-authenticated users
+        setMessages([{
+          sender: 'HealthBuddy',
+          content: "Hey there, welcome to VitaBuddy! 🎉\nI'm here to help you feel your best—and the more I get to know you, the better I can support you on your journey.\nTap the Profile tab to create an account or log in, and let's get started!\nCan't wait to team up with you! 💪✨"
+        }]);
       }
     });
 
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -333,6 +339,11 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
   const handleSend = async () => {
     if (!input.trim() || loading) return;
 
+    if (!isAuthenticated) {
+      setError('Please log in to continue');
+      return;
+    }
+
     const userMessage = input.trim();
     setInput('');
     setLoading(true);
@@ -344,10 +355,6 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
     setMessages(prev => [...prev, newUserMessage]);
 
     try {
-      if (!user?.id) {
-        throw new Error('Please log in to continue');
-      }
-
       // Add user message to messages array first
       const newMessages = [...messages, newUserMessage];
       setMessages(newMessages);
