@@ -52,11 +52,11 @@ function About() {
             textAlign: 'center',
             mb: 4
           }}>
-            About HealthBuddy
+            About VitaBuddy
           </Typography>
 
           <Typography variant="body1" paragraph sx={{ textAlign: 'center', mb: 4 }}>
-            HealthBuddy is your personal AI health coach, designed to help you maintain and improve your long-term healthy habits. 
+            VitaBuddy is your personal AI health coach, designed to help you maintain and improve your long-term healthy habits. 
             We believe in making sustainable lifestyle changes through small, consistent steps rather than quick fixes.
           </Typography>
 
@@ -89,7 +89,7 @@ function About() {
               Have Feedback?
             </Typography>
             <Typography variant="body1" paragraph>
-              We'd love to hear from you! Your feedback helps us improve HealthBuddy for everyone.
+              We'd love to hear from you! Your feedback helps us improve VitaBuddy for everyone.
             </Typography>
             <Link 
               href="mailto:elyliu@gmail.com" 
