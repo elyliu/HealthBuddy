@@ -376,7 +376,7 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
           }))
         },
         messages: [...historicalMessages, ...contextMessages],
-        systemPrompt: `You are HealthBuddy, a supportive and knowledgeable AI health coach. Your communication style is:
+        systemPrompt: `You are a supportive and knowledgeable AI health coach. Your communication style is:
           - Friendly and encouraging, but professional
           - Focused on sustainable, long-term health habits
           - Personalized to the user's goals and preferences
@@ -584,7 +584,7 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
                 {message.sender !== 'You' && (
                   <ListItemAvatar>
                     <Avatar 
-                      alt="HealthBuddy" 
+                      alt="VitaBuddy" 
                       src="/healthbuddy_logo_round.png"
                       sx={{ bgcolor: 'primary.main', width: 40, height: 40 }}
                     />
@@ -618,7 +618,7 @@ function Chat({ activities, onActivityAdded, onActivityUpdate }) {
               }}>
                 <ListItemAvatar>
                   <Avatar 
-                    alt="HealthBuddy" 
+                    alt="VitaBuddy" 
                     src="/healthbuddy_logo_round.png"
                     sx={{ bgcolor: 'primary.main', width: 40, height: 40 }}
                   />
