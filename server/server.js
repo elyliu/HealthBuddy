@@ -13,7 +13,7 @@ app.use(cors({
     'http://localhost:3000',
     'http://192.168.68.56:3000',
     'https://healthbuddy-client.onrender.com',
-    'https://healthbuddy.onrender.com'
+    'https://healthbuddy.onrender.com',
     'https://vitabuddy.ai',
     'https://www.vitabuddy.ai',
     'http://vitabuddy.ai',
