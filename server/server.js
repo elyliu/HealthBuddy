@@ -14,6 +14,10 @@ app.use(cors({
     'http://192.168.68.56:3000',
     'https://healthbuddy-client.onrender.com',
     'https://healthbuddy.onrender.com'
+    'https://vitabuddy.com',
+    'https://www.vitabuddy.com',
+    'http://vitabuddy.com',
+    'http://www.vitabuddy.com'
   ],
   methods: ['GET', 'POST'],
   credentials: true,
